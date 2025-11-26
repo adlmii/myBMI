@@ -5,13 +5,10 @@ import af.mobile.mybmi.theme.ColorBlueLovely
 import af.mobile.mybmi.theme.ColorGreenLovely
 import af.mobile.mybmi.theme.ColorOrangeLovely
 import af.mobile.mybmi.theme.ColorRedLovely
-import af.mobile.mybmi.theme.Gray200
-import af.mobile.mybmi.theme.Gray50
 import af.mobile.mybmi.theme.GreenPrimary
-import af.mobile.mybmi.theme.TextPrimary
-import af.mobile.mybmi.theme.TextSecondary
 import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.viewmodel.ResultViewModel
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,15 +22,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,18 +42,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance // PENTING: Untuk deteksi brightness
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-// Helper function untuk mendapatkan warna berdasarkan kategori
+// Helper functions
 fun getStatusColor(category: BMICategory): Color {
     return when (category) {
-        BMICategory.UNDERWEIGHT -> Color(0xFF3B82F6) // Blue
-        BMICategory.NORMAL -> Color(0xFF10B981) // Green
-        BMICategory.OVERWEIGHT -> Color(0xFFF59E0B) // Orange
-        BMICategory.OBESE -> Color(0xFFEF4444) // Red
+        BMICategory.UNDERWEIGHT -> Color(0xFF3B82F6)
+        BMICategory.NORMAL -> Color(0xFF10B981)
+        BMICategory.OVERWEIGHT -> Color(0xFFF59E0B)
+        BMICategory.OBESE -> Color(0xFFEF4444)
     }
 }
 
@@ -77,11 +76,17 @@ fun ResultScreen(
     var showUnsavedDialog by remember { mutableStateOf(false) }
     var isSaved by remember { mutableStateOf(false) }
 
+    // LOGIC FIX: Deteksi dark mode dari warna background tema yang sedang aktif
+    // Jika luminance (kecerahan) background rendah (< 0.5), berarti sedang Dark Mode
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
     currentResult?.let { summary ->
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Top bar with back button
+            // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,7 +103,7 @@ fun ResultScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = TextPrimary
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -106,12 +111,12 @@ fun ResultScreen(
                     text = "Detail Hasil",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     lineHeight = 32.sp
                 )
             }
 
-            Divider(color = Gray200, thickness = 1.dp)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
             Column(
                 modifier = Modifier
@@ -120,7 +125,7 @@ fun ResultScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Status Card - Kategori BMI
+                // CARD 1: Status Utama
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -141,39 +146,36 @@ fun ResultScreen(
                             text = "Status Berat Anda",
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.9f),
-                            fontWeight = FontWeight.Medium,
-                            lineHeight = 20.sp
+                            fontWeight = FontWeight.Medium
                         )
-
                         Spacer(modifier = Modifier.height(16.dp))
-
                         Text(
                             text = summary.category.displayName,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            lineHeight = 40.sp
+                            color = Color.White
                         )
-
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Text(
                             text = "BMI: ${summary.bmi}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White.copy(alpha = 0.95f),
-                            lineHeight = 26.sp
+                            color = Color.White.copy(alpha = 0.95f)
                         )
                     }
                 }
 
-                // Penjelasan Card
+                // CARD 2: Penjelasan Detail
+                // Gunakan background Surface (Abu-abu) di Dark Mode agar nyaman
+                val detailCardColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else getStatusBackgroundColor(summary.category)
+                val statusTextColor = getStatusColor(summary.category)
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = getStatusBackgroundColor(summary.category)
+                        containerColor = detailCardColor
                     ),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -183,18 +185,16 @@ fun ResultScreen(
                             .fillMaxWidth()
                             .padding(24.dp)
                     ) {
-                        // Title
                         Text(
                             text = "Penjelasan Detail",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
-                            lineHeight = 24.sp
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Ideal Weight Section
+                        // Berat Ideal
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -206,65 +206,63 @@ fun ResultScreen(
                                     text = "Berat Ideal",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = TextSecondary,
-                                    lineHeight = 18.sp
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = "${summary.idealWeightRange.first.toInt()} - ${summary.idealWeightRange.second.toInt()} kg",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = getStatusColor(summary.category),
-                                    lineHeight = 24.sp
+                                    color = statusTextColor
                                 )
                             }
                         }
 
-                        Divider(color = Gray200, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
 
-                        // Status Section
+                        // Status Description
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = "Status",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = TextSecondary,
-                                lineHeight = 18.sp
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = summary.category.description,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = TextPrimary,
-                                lineHeight = 22.sp
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Advice Section
+                        // Advice
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = "Saran",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = TextSecondary,
-                                lineHeight = 18.sp
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = summary.category.advice,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = TextPrimary,
-                                lineHeight = 22.sp
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                 }
 
-                // Button Simpan Hasil
+                // Button Simpan
                 Button(
                     onClick = {
                         isSaved = true
@@ -279,45 +277,43 @@ fun ResultScreen(
                         containerColor = GreenPrimary
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 8.dp
-                    )
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                 ) {
                     Text(
                         text = "Simpan Hasil",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                        lineHeight = 24.sp
+                        color = Color.White
                     )
                 }
             }
         }
 
-        // Alert Dialog untuk konfirmasi kembali tanpa menyimpan
+        // ==============================================
+        // ALERT DIALOG FIX (Pure White Text in Dark Mode)
+        // ==============================================
         if (showUnsavedDialog) {
             AlertDialog(
                 onDismissRequest = { showUnsavedDialog = false },
-                containerColor = Gray50,
-                titleContentColor = TextPrimary,
-                textContentColor = TextSecondary,
-                shape = RoundedCornerShape(20.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                textContentColor = MaterialTheme.colorScheme.onSurface,
+
+                shape = RoundedCornerShape(24.dp),
                 title = {
                     Text(
-                        text = "Apakah tidak ingin disimpan?",
+                        text = "Belum Disimpan?",
+                        color = if (isDarkTheme) Color.White else Color.Black,
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                        lineHeight = 28.sp
+                        fontWeight = FontWeight.Bold
                     )
                 },
                 text = {
                     Text(
-                        text = "Hasil BMI Anda akan hilang jika tidak disimpan. Pastikan untuk menyimpan hasil penting Anda.",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = TextSecondary,
+                        text = "Data hasil BMI ini akan hilang kalau kamu kembali sekarang. Yakin tidak mau menyimpannya?",
+                        color = if (isDarkTheme) Color.White else Color.Black,
+                        fontSize = 15.sp,
                         lineHeight = 22.sp
                     )
                 },
@@ -327,47 +323,27 @@ fun ResultScreen(
                             showUnsavedDialog = false
                             onNavigateBack()
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ColorRed
                         ),
-                        shape = RoundedCornerShape(10.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(start = 8.dp)
                     ) {
-                        Text(
-                            text = "Kembali Tanpa Simpan",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            lineHeight = 20.sp
-                        )
+                        Text("Buang Data", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = {
-                    Button(
-                        onClick = { showUnsavedDialog = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = GreenPrimary
-                        ),
-                        shape = RoundedCornerShape(10.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    TextButton(
+                        onClick = { showUnsavedDialog = false }
                     ) {
                         Text(
                             text = "Batal",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = GreenPrimary,
-                            lineHeight = 20.sp
+                            // Gunakan Hijau jika background gelap, abu-abu jika terang
+                            color = if (isDarkTheme) GreenPrimary else Color.Gray,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
-                },
-                modifier = Modifier.padding(horizontal = 16.dp)
+                }
             )
         }
     }

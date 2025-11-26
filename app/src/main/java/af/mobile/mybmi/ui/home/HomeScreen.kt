@@ -1,14 +1,7 @@
 package af.mobile.mybmi.ui.home
 
 import af.mobile.mybmi.theme.Gray200
-import af.mobile.mybmi.theme.Gray300
-import af.mobile.mybmi.theme.Gray50
 import af.mobile.mybmi.theme.GreenPrimary
-import af.mobile.mybmi.theme.TextPrimary
-import af.mobile.mybmi.theme.TextSecondary
-import af.mobile.mybmi.theme.getCardColor
-import af.mobile.mybmi.theme.getTextPrimaryColor
-import af.mobile.mybmi.theme.getTextSecondaryColor
 import af.mobile.mybmi.viewmodel.InputViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -53,13 +46,12 @@ fun HomeScreen(
 ) {
     val input by inputViewModel.input.collectAsState()
     val isCalculating by inputViewModel.isCalculating.collectAsState()
-    // Get colors from Material theme (will automatically adapt to dark/light mode)
-    val backgroundColor = Color.Transparent // Uses parent theme background
-    val cardBackgroundColor = Color.Transparent // Uses parent theme surface color
 
+    // Use background color from MaterialTheme
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // IMPORTANT: Follows theme background (Dark/Light)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -83,7 +75,7 @@ fun HomeScreen(
             text = "Pantau BMI Kamu",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground, // AUTOMATIC: Black in Light, White in Dark
             textAlign = TextAlign.Center,
             lineHeight = 36.sp
         )
@@ -93,7 +85,7 @@ fun HomeScreen(
         Text(
             text = "Hitung dan monitor kesehatan badan Anda dengan mudah",
             fontSize = 14.sp,
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, // AUTOMATIC: Dark Gray in Light, Light Gray in Dark
             textAlign = TextAlign.Center,
             lineHeight = 20.sp
         )
@@ -104,7 +96,7 @@ fun HomeScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surface // AUTOMATIC: White in Light, Medium Gray in Dark
             ),
             shape = RoundedCornerShape(20.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -116,18 +108,18 @@ fun HomeScreen(
                     text = "Hitung BMI Kamu",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface, // Text inside card
                     lineHeight = 30.sp
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // Input Tinggi
+                // Input Height
                 Text(
                     text = "Tinggi Badan",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
 
@@ -135,27 +127,31 @@ fun HomeScreen(
                     value = input.height,
                     onValueChange = { inputViewModel.updateHeight(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Contoh: 170 cm", fontSize = 13.sp) },
+                    placeholder = {
+                        Text("Contoh: 170 cm", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = GreenPrimary,
                         unfocusedBorderColor = Gray200,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
+                        focusedContainerColor = MaterialTheme.colorScheme.surface, // Matches card color
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface, // User input text
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     textStyle = TextStyle(fontSize = 14.sp)
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Input Berat
+                // Input Weight
                 Text(
                     text = "Berat Badan",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
 
@@ -163,26 +159,30 @@ fun HomeScreen(
                     value = input.weight,
                     onValueChange = { inputViewModel.updateWeight(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Contoh: 65 kg", fontSize = 13.sp) },
+                    placeholder = {
+                        Text("Contoh: 65 kg", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = GreenPrimary,
                         unfocusedBorderColor = Gray200,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     textStyle = TextStyle(fontSize = 14.sp)
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // Button Hitung
+                // Calculate Button
                 Button(
                     onClick = {
                         inputViewModel.calculateBMI { summary ->
-                            // Nanti save ke ResultViewModel lewat MainActivity
+                            // Save to ResultViewModel via MainActivity
                             onNavigateToResult()
                         }
                     },
@@ -192,7 +192,7 @@ fun HomeScreen(
                     enabled = inputViewModel.canCalculate() && !isCalculating,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GreenPrimary,
-                        disabledContainerColor = Gray200
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     shape = RoundedCornerShape(12.dp),
                     elevation = ButtonDefaults.buttonElevation(

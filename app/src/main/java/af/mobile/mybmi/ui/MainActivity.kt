@@ -1,8 +1,7 @@
 package af.mobile.mybmi.ui
 
-import af.mobile.mybmi.theme.Gray400
-import af.mobile.mybmi.theme.GreenPrimary
 import af.mobile.mybmi.theme.MintLight
+import af.mobile.mybmi.theme.DarkGreenLovely
 import af.mobile.mybmi.theme.getNavBarColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -68,7 +67,6 @@ fun MyBMIApp(themeViewModel: ThemeViewModel = viewModel()) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Routes yang menampilkan bottom bar
     val routesWithBottomBar = listOf(
         Screen.Home.route,
         Screen.History.route,
@@ -92,19 +90,13 @@ fun MyBMIApp(themeViewModel: ThemeViewModel = viewModel()) {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Splash.route) {
-                SplashScreen(
-                    onNavigateToHome = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
-                        }
-                    }
-                )
+                SplashScreen(onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } }
+                })
             }
-
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToResult = {
-                        // Get current result from inputViewModel and pass to resultViewModel
                         inputViewModel.calculateBMI { summary ->
                             resultViewModel.setCurrentResult(summary)
                             navController.navigate(Screen.Result.route)
@@ -113,49 +105,20 @@ fun MyBMIApp(themeViewModel: ThemeViewModel = viewModel()) {
                     inputViewModel = inputViewModel
                 )
             }
-
             composable(Screen.Result.route) {
-                ResultScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
-                    resultViewModel = resultViewModel
-                )
+                ResultScreen(onNavigateBack = { navController.popBackStack() }, resultViewModel = resultViewModel)
             }
-
             composable(Screen.History.route) {
-                HistoryScreen(
-                    onNavigateToDetail = {
-                        navController.navigate(Screen.HistoryDetail.route)
-                    },
-                    resultViewModel = resultViewModel
-                )
+                HistoryScreen(onNavigateToDetail = { navController.navigate(Screen.HistoryDetail.route) }, resultViewModel = resultViewModel)
             }
-
             composable(Screen.HistoryDetail.route) {
-                HistoryDetailScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
-                    resultViewModel = resultViewModel
-                )
+                HistoryDetailScreen(onNavigateBack = { navController.popBackStack() }, resultViewModel = resultViewModel)
             }
-
             composable(Screen.Profile.route) {
-                ProfileScreen(
-                    onNavigateToSettings = {
-                        navController.navigate(Screen.Settings.route)
-                    }
-                )
+                ProfileScreen(onNavigateToSettings = { navController.navigate(Screen.Settings.route) })
             }
-
             composable(Screen.Settings.route) {
-                SettingsScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
-                    themeViewModel = themeViewModel
-                )
+                SettingsScreen(onNavigateBack = { navController.popBackStack() }, themeViewModel = themeViewModel)
             }
         }
     }
@@ -167,9 +130,16 @@ fun BottomNavigationBar(
     currentRoute: String?,
     isDarkMode: Boolean = false
 ) {
+
+    val selectedColor = Color.White
+
+    val unselectedColor = if (isDarkMode) Color.Gray else MintLight
+
+    val indicatorColor = if (isDarkMode) DarkGreenLovely else Color.White.copy(alpha = 0.2f)
+
     NavigationBar(
-        containerColor = getNavBarColor(isDarkMode),
-        tonalElevation = 8.dp
+        containerColor = getNavBarColor(isDarkMode), // Akan hijau di Light Mode
+        tonalElevation = 0.dp
     ) {
         val items = listOf(
             BottomNavItem.Home,
@@ -178,6 +148,8 @@ fun BottomNavigationBar(
         )
 
         items.forEach { item ->
+            val isSelected = currentRoute == item.route
+
             NavigationBarItem(
                 icon = {
                     Image(
@@ -185,7 +157,7 @@ fun BottomNavigationBar(
                         contentDescription = item.label,
                         modifier = Modifier.size(24.dp),
                         colorFilter = ColorFilter.tint(
-                            if (currentRoute == item.route) GreenPrimary else Gray400
+                            if (isSelected) selectedColor else unselectedColor
                         )
                     )
                 },
@@ -193,38 +165,32 @@ fun BottomNavigationBar(
                     Text(
                         text = item.label,
                         fontSize = 12.sp,
-                        fontWeight = if (currentRoute == item.route) {
-                            FontWeight.SemiBold
-                        } else {
-                            FontWeight.Normal
-                        }
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (isSelected) selectedColor else unselectedColor
                     )
                 },
-                selected = currentRoute == item.route,
+                selected = isSelected,
                 onClick = {
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
-                            popUpTo(Screen.Home.route) {
-                                saveState = true
-                            }
+                            popUpTo(Screen.Home.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = GreenPrimary,
-                    selectedTextColor = GreenPrimary,
-                    unselectedIconColor = Gray400,
-                    unselectedTextColor = Gray400,
-                    indicatorColor = MintLight
+                    selectedIconColor = selectedColor,
+                    selectedTextColor = selectedColor,
+                    unselectedIconColor = unselectedColor,
+                    unselectedTextColor = unselectedColor,
+                    indicatorColor = indicatorColor
                 )
             )
         }
     }
 }
 
-// Navigation routes
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Home : Screen("home")
@@ -235,27 +201,8 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
 }
 
-// Bottom nav items
-sealed class BottomNavItem(
-    val route: String,
-    val iconRes: Int,
-    val label: String
-) {
-    object Home : BottomNavItem(
-        route = Screen.Home.route,
-        iconRes = R.drawable.icon1,
-        label = "Beranda"
-    )
-
-    object History : BottomNavItem(
-        route = Screen.History.route,
-        iconRes = R.drawable.icon3,
-        label = "Riwayat"
-    )
-
-    object Profile : BottomNavItem(
-        route = Screen.Profile.route,
-        iconRes = R.drawable.icon2,
-        label = "Profil"
-    )
+sealed class BottomNavItem(val route: String, val iconRes: Int, val label: String) {
+    object Home : BottomNavItem(Screen.Home.route, R.drawable.icon1, "Beranda")
+    object History : BottomNavItem(Screen.History.route, R.drawable.icon3, "Riwayat")
+    object Profile : BottomNavItem(Screen.Profile.route, R.drawable.icon2, "Profil")
 }

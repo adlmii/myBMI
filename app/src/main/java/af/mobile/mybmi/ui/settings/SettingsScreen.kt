@@ -1,10 +1,6 @@
 package af.mobile.mybmi.ui.settings
 
-import af.mobile.mybmi.theme.Gray200
-import af.mobile.mybmi.theme.Gray50
 import af.mobile.mybmi.theme.GreenPrimary
-import af.mobile.mybmi.theme.TextPrimary
-import af.mobile.mybmi.theme.TextSecondary
 import af.mobile.mybmi.viewmodel.ThemeViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +46,9 @@ fun SettingsScreen(
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Auto Background
     ) {
         // Top bar with back button
         Row(
@@ -63,7 +61,7 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = TextPrimary
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -71,12 +69,12 @@ fun SettingsScreen(
                 text = "Pengaturan",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 lineHeight = 32.sp
             )
         }
 
-        Divider(color = Gray200, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
         Column(
             modifier = Modifier
@@ -90,7 +88,7 @@ fun SettingsScreen(
                 text = "Tampilan",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 lineHeight = 24.sp
             )
 
@@ -102,7 +100,7 @@ fun SettingsScreen(
                         themeViewModel.toggleDarkMode()
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface // Auto Card Color
                 ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -119,14 +117,14 @@ fun SettingsScreen(
                             text = "Mode Gelap",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface, // Auto Text
                             lineHeight = 22.sp
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Gunakan mode gelap untuk mata yang lebih nyaman",
                             fontSize = 13.sp,
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, // Auto Secondary Text
                             lineHeight = 18.sp
                         )
                     }
@@ -140,7 +138,7 @@ fun SettingsScreen(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = GreenPrimary,
                             uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = Gray200
+                            uncheckedTrackColor = MaterialTheme.colorScheme.outlineVariant
                         )
                     )
                 }
@@ -153,7 +151,7 @@ fun SettingsScreen(
                 text = "Tentang Aplikasi",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 lineHeight = 24.sp
             )
 
@@ -178,14 +176,14 @@ fun SettingsScreen(
                             text = "Versi Aplikasi",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             lineHeight = 22.sp
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "1.0.0",
                             fontSize = 13.sp,
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 18.sp
                         )
                     }
@@ -217,7 +215,7 @@ fun SettingsScreen(
                             text = "Kebijakan Privasi",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             lineHeight = 22.sp
                         )
                     }
@@ -225,11 +223,10 @@ fun SettingsScreen(
                     Text(
                         text = "→",
                         fontSize = 18.sp,
-                        color = TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
     }
 }
-

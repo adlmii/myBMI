@@ -1,11 +1,7 @@
 package af.mobile.mybmi.ui.profile
 
 import af.mobile.mybmi.theme.ColorRed
-import af.mobile.mybmi.theme.Gray50
-import af.mobile.mybmi.theme.Gray200
 import af.mobile.mybmi.theme.GreenPrimary
-import af.mobile.mybmi.theme.TextPrimary
-import af.mobile.mybmi.theme.TextSecondary
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,13 +19,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +36,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Auto Background
             .padding(horizontal = 24.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -62,7 +58,7 @@ fun ProfileScreen(
             text = "Profil",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground, // Auto Text
             lineHeight = 36.sp
         )
 
@@ -72,7 +68,7 @@ fun ProfileScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surface // Auto Card Color
             ),
             shape = RoundedCornerShape(20.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -81,9 +77,9 @@ fun ProfileScreen(
                 modifier = Modifier.padding(8.dp)
             ) {
                 ProfileMenuItem("Ubah Profil", "→", onClick = {})
-                Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 0.dp), thickness = 1.dp, color = Gray200)
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 ProfileMenuItem("Pengaturan", "→", onClick = onNavigateToSettings)
-                Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 0.dp), thickness = 1.dp, color = Gray200)
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 ProfileMenuItem("Bantuan & Laporan", "→", onClick = {})
             }
         }
@@ -128,13 +124,13 @@ private fun ProfileMenuItem(text: String, icon: String, onClick: () -> Unit = {}
             text = text,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onSurface, // Adapts to theme
             lineHeight = 22.sp
         )
         Text(
             text = icon,
             fontSize = 18.sp,
-            color = TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant // Adapts to theme
         )
     }
 }

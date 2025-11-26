@@ -1,9 +1,6 @@
 package af.mobile.mybmi.ui.history
 
 import af.mobile.mybmi.model.BMICheckSummary
-import af.mobile.mybmi.theme.Gray200
-import af.mobile.mybmi.theme.TextPrimary
-import af.mobile.mybmi.theme.TextSecondary
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +41,7 @@ fun HistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Auto Dark/Light Background
             .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
         // Header
@@ -51,7 +49,7 @@ fun HistoryScreen(
             text = "Riwayat",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground, // Auto Text Color
             lineHeight = 36.sp
         )
 
@@ -75,13 +73,13 @@ fun HistoryScreen(
                         text = "Belum ada riwayat",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Hitung BMI Anda terlebih dahulu",
                         fontSize = 14.sp,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 20.sp
                     )
                 }
@@ -115,7 +113,7 @@ private fun HistoryCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface // Auto Card Color
         ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -132,14 +130,14 @@ private fun HistoryCard(
                     text = summary.getDateFormatted(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface, // Text inside card
                     lineHeight = 22.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${summary.getTimeFormatted()} • BMI: ${summary.bmi}",
                     fontSize = 13.sp,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, // Secondary text inside card
                     lineHeight = 18.sp
                 )
             }
@@ -165,6 +163,3 @@ private fun HistoryCard(
         }
     }
 }
-
-
-
