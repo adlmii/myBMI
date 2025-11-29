@@ -2,6 +2,8 @@ package af.mobile.mybmi.ui.profile
 
 import af.mobile.mybmi.theme.ColorRed
 import af.mobile.mybmi.theme.GreenPrimary
+import af.mobile.mybmi.theme.getButtonDisabledContainerColor
+import af.mobile.mybmi.theme.getButtonDisabledContentColor
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector // Import ImageVector
+import androidx.compose.ui.graphics.luminance // Import Luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,6 +38,13 @@ fun ProfileScreen(
     userViewModel: UserViewModel? = null
 ) {
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
+
+    // --- DETEKSI DARK MODE APLIKASI ---
+    val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+    // Siapkan warna untuk konsistensi (walaupun tombol keluar saat ini pakai Merah)
+    val disabledButtonContainer = getButtonDisabledContainerColor(isDarkMode)
+    val disabledButtonContent = getButtonDisabledContentColor(isDarkMode)
 
     Box(
         modifier = Modifier
@@ -72,13 +82,13 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // AVATAR (Overlap effect)
+            // AVATAR
             Box(
                 modifier = Modifier
                     .size(120.dp)
                     .shadow(16.dp, shape = CircleShape)
                     .background(Color.White, shape = CircleShape)
-                    .padding(4.dp) // Border putih
+                    .padding(4.dp)
                     .clip(CircleShape)
                     .background(GreenPrimary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
@@ -112,7 +122,6 @@ fun ProfileScreen(
                 shape = RoundedCornerShape(20.dp)
             ) {
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    // Item 1: Ubah Profil (Icon Edit)
                     ProfileMenuItem(
                         text = "Ubah Profil",
                         icon = Icons.Default.Edit,
@@ -124,7 +133,6 @@ fun ProfileScreen(
                         thickness = 1.dp
                     )
 
-                    // Item 2: Pengaturan (Icon Settings)
                     ProfileMenuItem(
                         text = "Pengaturan",
                         icon = Icons.Default.Settings,
@@ -136,6 +144,8 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // LOGOUT BUTTON
+            // Tombol ini menggunakan warna Merah, jadi tidak menggunakan helper hijau.
+            // Namun style-nya sudah konsisten secara struktur.
             Button(
                 onClick = { /* TODO */ },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -158,7 +168,6 @@ private fun ProfileMenuItem(text: String, icon: ImageVector, onClick: () -> Unit
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon di Kiri (Warna Primary)
         Icon(
             imageVector = icon,
             contentDescription = null,
@@ -168,7 +177,6 @@ private fun ProfileMenuItem(text: String, icon: ImageVector, onClick: () -> Unit
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Teks Menu
         Text(
             text = text,
             fontSize = 16.sp,
@@ -177,7 +185,6 @@ private fun ProfileMenuItem(text: String, icon: ImageVector, onClick: () -> Unit
             modifier = Modifier.weight(1f)
         )
 
-        // Icon Panah di Kanan
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = "Open",

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance // 1. Import Luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,9 +31,14 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     themeViewModel: ThemeViewModel = viewModel()
 ) {
-    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    // State dari ViewModel untuk Switch
+    val isDarkModeState by themeViewModel.isDarkMode.collectAsState()
 
-    // State untuk mengontrol dialog Kebijakan Privasi
+    // --- 1. DETEKSI DARK MODE DARI TEMA APLIKASI (Visual) ---
+    // Menggunakan luminance background agar konsisten dengan screen lain
+    val isAppDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+    // State untuk Dialog
     var showPrivacyDialog by remember { mutableStateOf(false) }
 
     Box(
@@ -85,7 +91,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Settings Groups
-            SettingsSectionTitle("Tampilan")
+            SettingsSectionTitle("Tampilan", isAppDark) // Pass isAppDark if needed for styling logic
 
             // Toggle Dark Mode Card
             Card(
@@ -118,7 +124,7 @@ fun SettingsScreen(
                         )
                     }
                     Switch(
-                        checked = isDarkMode,
+                        checked = isDarkModeState,
                         onCheckedChange = { themeViewModel.setDarkMode(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
@@ -132,7 +138,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SettingsSectionTitle("Tentang & Privasi")
+            SettingsSectionTitle("Tentang & Privasi", isAppDark)
 
             Card(
                 modifier = Modifier
@@ -177,11 +183,10 @@ fun SettingsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { showPrivacyDialog = true } // Trigger Dialog
+                            .clickable { showPrivacyDialog = true }
                             .padding(horizontal = 20.dp, vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Icon di Kiri (Lock/Privacy)
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Privacy",
@@ -197,7 +202,6 @@ fun SettingsScreen(
                             modifier = Modifier.weight(1f)
                         )
 
-                        // Arrow di Kanan
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = "Open",
@@ -217,7 +221,8 @@ fun SettingsScreen(
                 Text(
                     text = "Kebijakan Privasi",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface // Pastikan warna kontras
                 )
             },
             text = {
@@ -229,25 +234,10 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    PrivacySection(
-                        title = "1. Pengumpulan Data",
-                        content = "Aplikasi myBMI tidak mengumpulkan data pribadi Anda ke server eksternal. Semua data tinggi badan, berat badan, dan riwayat BMI disimpan secara lokal di perangkat Anda."
-                    )
-
-                    PrivacySection(
-                        title = "2. Penggunaan Data",
-                        content = "Data yang Anda masukkan hanya digunakan untuk keperluan perhitungan BMI dan menampilkan riwayat kesehatan Anda di dalam aplikasi."
-                    )
-
-                    PrivacySection(
-                        title = "3. Keamanan",
-                        content = "Karena data disimpan secara lokal (offline database), keamanan data Anda bergantung pada keamanan perangkat fisik Anda."
-                    )
-
-                    PrivacySection(
-                        title = "4. Kontak Kami",
-                        content = "Jika Anda memiliki pertanyaan mengenai privasi aplikasi ini, silakan hubungi tim pengembang kami."
-                    )
+                    PrivacySection("1. Pengumpulan Data", "Aplikasi myBMI tidak mengumpulkan data pribadi Anda ke server eksternal. Semua data tinggi badan, berat badan, dan riwayat BMI disimpan secara lokal di perangkat Anda.")
+                    PrivacySection("2. Penggunaan Data", "Data yang Anda masukkan hanya digunakan untuk keperluan perhitungan BMI dan menampilkan riwayat kesehatan Anda di dalam aplikasi.")
+                    PrivacySection("3. Keamanan", "Karena data disimpan secara lokal (offline database), keamanan data Anda bergantung pada keamanan perangkat fisik Anda.")
+                    PrivacySection("4. Kontak Kami", "Jika Anda memiliki pertanyaan mengenai privasi aplikasi ini, silakan hubungi tim pengembang kami.")
                 }
             },
             confirmButton = {
@@ -256,17 +246,18 @@ fun SettingsScreen(
                 }
             },
             shape = RoundedCornerShape(20.dp),
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface // Card Dialog Background
         )
     }
 }
 
 @Composable
-private fun SettingsSectionTitle(text: String) {
+private fun SettingsSectionTitle(text: String, isAppDark: Boolean) {
     Text(
         text = text,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
+        // Warna text section title disesuaikan agar tidak terlalu gelap/terang
         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
         modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
     )

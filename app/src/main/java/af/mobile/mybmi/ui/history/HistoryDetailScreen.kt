@@ -2,6 +2,7 @@ package af.mobile.mybmi.ui.history
 
 import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.viewmodel.ResultViewModel
+import af.mobile.mybmi.theme.* // Import warna-warna
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,18 +18,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance // Import Luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-// Helper colors (Sama seperti di ResultScreen)
+// Helper colors (Bisa juga dipindah ke util jika mau reuse)
 fun getStatusColor(category: BMICategory): Color {
     return when (category) {
         BMICategory.UNDERWEIGHT -> Color(0xFF3B82F6)
         BMICategory.NORMAL -> Color(0xFF10B981)
         BMICategory.OVERWEIGHT -> Color(0xFFF59E0B)
         BMICategory.OBESE -> Color(0xFFEF4444)
+    }
+}
+
+fun getStatusBackgroundColor(category: BMICategory): Color {
+    return when (category) {
+        BMICategory.UNDERWEIGHT -> ColorBlueLovely
+        BMICategory.NORMAL -> ColorGreenLovely
+        BMICategory.OVERWEIGHT -> ColorOrangeLovely
+        BMICategory.OBESE -> ColorRedLovely
     }
 }
 
@@ -39,13 +50,16 @@ fun HistoryDetailScreen(
 ) {
     val selectedHistory by resultViewModel.selectedHistory.collectAsState()
 
+    // --- 1. DETEKSI DARK MODE APLIKASI ---
+    val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
     selectedHistory?.let { summary ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // 1. TOP BAR (Simple)
+            // TOP BAR
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,7 +84,7 @@ fun HistoryDetailScreen(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-            // 2. CONTENT
+            // CONTENT
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -78,13 +92,13 @@ fun HistoryDetailScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // STATUS CARD (Hero Element)
+                // STATUS CARD
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(
                             elevation = 12.dp,
-                            spotColor = getStatusColor(summary.category).copy(alpha = 0.5f), // Glow effect warna status
+                            spotColor = getStatusColor(summary.category).copy(alpha = 0.5f),
                             shape = RoundedCornerShape(24.dp)
                         ),
                     colors = CardDefaults.cardColors(
@@ -125,6 +139,9 @@ fun HistoryDetailScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // INFORMATION CARD
+                // Gunakan isDarkMode untuk warna background kartu
+                val detailCardColor = if (isDarkMode) MaterialTheme.colorScheme.surface else getStatusBackgroundColor(summary.category)
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,7 +151,7 @@ fun HistoryDetailScreen(
                             shape = RoundedCornerShape(20.dp)
                         ),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = detailCardColor
                     ),
                     shape = RoundedCornerShape(20.dp)
                 ) {
@@ -148,7 +165,6 @@ fun HistoryDetailScreen(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // Detail Items
                         DetailRow("Tanggal", summary.getDateFormatted())
                         Divider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
 

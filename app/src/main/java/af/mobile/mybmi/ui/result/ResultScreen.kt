@@ -16,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.luminance // Import Luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,16 +45,16 @@ fun getStatusBackgroundColor(category: BMICategory): Color {
 fun ResultScreen(
     onNavigateBack: () -> Unit,
     resultViewModel: ResultViewModel = viewModel(),
-    userViewModel: UserViewModel? = null // PASTIKAN ADA INI
+    userViewModel: UserViewModel? = null
 ) {
     val currentResult by resultViewModel.currentResult.collectAsState()
-    // Ambil user yang sedang login
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
     var showUnsavedDialog by remember { mutableStateOf(false) }
     var isSaved by remember { mutableStateOf(false) }
 
-    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    // --- 1. DETEKSI DARK MODE DARI TEMA APLIKASI ---
+    val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     currentResult?.let { summary ->
         Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -88,7 +88,8 @@ fun ResultScreen(
                 }
 
                 // Card 2: Detail
-                val detailCardColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else getStatusBackgroundColor(summary.category)
+                // Logika warna background detail menyesuaikan Dark Mode App
+                val detailCardColor = if (isDarkMode) MaterialTheme.colorScheme.surface else getStatusBackgroundColor(summary.category)
                 val statusTextColor = getStatusColor(summary.category)
 
                 Card(
@@ -122,15 +123,13 @@ fun ResultScreen(
                     }
                 }
 
-                // Button Simpan (LOGIC BARU)
+                // Button Simpan
                 Button(
                     onClick = {
-                        // Hanya simpan jika belum disimpan & user ada
                         if (!isSaved && currentUser != null) {
                             resultViewModel.saveToHistory(summary, currentUser!!.id)
                             isSaved = true
                         }
-                        // Bersihkan hasil current di memori agar bersih
                         resultViewModel.clearCurrentResult()
                         onNavigateBack()
                     },
@@ -152,12 +151,11 @@ fun ResultScreen(
                 titleContentColor = MaterialTheme.colorScheme.onSurface,
                 textContentColor = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(24.dp),
-                title = { Text(text = "Belum Disimpan?", color = if (isDarkTheme) Color.White else Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold) },
-                text = { Text(text = "Data hasil BMI ini akan hilang kalau kamu kembali sekarang. Yakin tidak mau menyimpannya?", color = if (isDarkTheme) Color.White else Color.Black, fontSize = 15.sp, lineHeight = 22.sp) },
+                title = { Text(text = "Belum Disimpan?", color = if (isDarkMode) Color.White else Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold) },
+                text = { Text(text = "Data hasil BMI ini akan hilang kalau kamu kembali sekarang. Yakin tidak mau menyimpannya?", color = if (isDarkMode) Color.White else Color.Black, fontSize = 15.sp, lineHeight = 22.sp) },
                 confirmButton = {
                     Button(
                         onClick = {
-                            // BUANG DATA: Hapus dari memori & jangan simpan ke DB
                             showUnsavedDialog = false
                             resultViewModel.clearCurrentResult()
                             onNavigateBack()
@@ -171,7 +169,7 @@ fun ResultScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text(text = "Batal", color = if (isDarkTheme) GreenPrimary else Color.Gray, fontWeight = FontWeight.SemiBold)
+                        Text(text = "Batal", color = if (isDarkMode) GreenPrimary else Color.Gray, fontWeight = FontWeight.SemiBold)
                     }
                 }
             )

@@ -9,7 +9,6 @@ import af.mobile.mybmi.viewmodel.InputViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-// HAPUS: import androidx.compose.foundation.isSystemInDarkTheme (Tidak dipakai lagi)
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -26,7 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance // PENTING: Tambahkan ini untuk deteksi warna
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +53,7 @@ fun HomeScreen(
     val lastBmi = history.firstOrNull()
 
     // --- 1. DETEKSI DARK MODE DARI TEMA APLIKASI ---
+    // Menggunakan luminance background untuk menentukan apakah tema gelap aktif
     val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     // Ambil warna custom dari Color.kt berdasarkan status isDarkMode di atas
@@ -345,7 +345,6 @@ fun HomeScreen(
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                            // OVERRIDE PLACEHOLDER COLOR
                             focusedPlaceholderColor = placeholderColor,
                             unfocusedPlaceholderColor = placeholderColor
                         ),
@@ -404,7 +403,7 @@ fun ModernInput(
     onValueChange: (String) -> Unit,
     suffix: String,
     placeholderText: String,
-    placeholderColor: Color // Parameter Warna
+    placeholderColor: Color // Parameter Warna Kunci
 ) {
     Column {
         Text(
