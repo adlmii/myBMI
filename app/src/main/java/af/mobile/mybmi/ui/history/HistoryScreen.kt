@@ -2,7 +2,7 @@ package af.mobile.mybmi.ui.history
 
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.viewmodel.ResultViewModel
-import androidx.compose.foundation.background
+import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,34 +22,46 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.background
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HistoryScreen(
     onNavigateToDetail: () -> Unit,
-    resultViewModel: ResultViewModel = viewModel()
+    resultViewModel: ResultViewModel = viewModel(),
+    userViewModel: UserViewModel? = null
 ) {
     val history by resultViewModel.history.collectAsState()
+    val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
+
+    // Load history when screen is first composed or when user changes
+    LaunchedEffect(currentUser?.id) {
+        if (currentUser != null && currentUser!!.id > 0) {
+            resultViewModel.loadHistory(currentUser!!.id)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Auto Dark/Light Background
-            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        // Header
         Text(
-            text = "Riwayat",
+            text = "📊 Riwayat BMI",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground, // Auto Text Color
+            color = MaterialTheme.colorScheme.onBackground,
             lineHeight = 36.sp
         )
 

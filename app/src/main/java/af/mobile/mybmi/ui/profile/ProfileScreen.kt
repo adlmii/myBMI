@@ -2,6 +2,7 @@ package af.mobile.mybmi.ui.profile
 
 import af.mobile.mybmi.theme.ColorRed
 import af.mobile.mybmi.theme.GreenPrimary
+import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -31,8 +36,11 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ProfileScreen(
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    userViewModel: UserViewModel? = null
 ) {
+    val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,13 +62,30 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Profil",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground, // Auto Text
-            lineHeight = 36.sp
-        )
+        // User name display
+        if (currentUser != null) {
+            Text(
+                text = currentUser!!.name,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Profil Pengguna",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Text(
+                text = "Profil",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                lineHeight = 36.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 

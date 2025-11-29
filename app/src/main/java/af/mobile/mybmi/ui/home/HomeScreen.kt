@@ -1,9 +1,10 @@
 package af.mobile.mybmi.ui.home
 
-import af.mobile.mybmi.theme.Gray200
 import af.mobile.mybmi.theme.GreenPrimary
 import af.mobile.mybmi.viewmodel.InputViewModel
+import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,152 +30,163 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreen(
-    onNavigateToResult: () -> Unit,
-    inputViewModel: InputViewModel = viewModel()
+    onNavigateToResult: (af.mobile.mybmi.model.BMICheckSummary) -> Unit,
+    inputViewModel: InputViewModel = viewModel(),
+    userViewModel: UserViewModel? = null,
+    resultViewModel: af.mobile.mybmi.viewmodel.ResultViewModel? = null
 ) {
     val input by inputViewModel.input.collectAsState()
     val isCalculating by inputViewModel.isCalculating.collectAsState()
+    val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
+    val showNameInput by userViewModel?.showNameInput?.collectAsState() ?: remember { mutableStateOf(false) }
+    val isLoading by userViewModel?.isLoading?.collectAsState() ?: remember { mutableStateOf(false) }
+    val history by resultViewModel?.history?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    var inputName by remember { mutableStateOf("") }
 
-    // Use background color from MaterialTheme
+    // Get latest BMI from history
+    val lastBmi = history.firstOrNull()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // IMPORTANT: Follows theme background (Dark/Light)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Avatar section
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .background(GreenPrimary.copy(alpha = 0.15f), shape = RoundedCornerShape(60.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("👤", fontSize = 56.sp)
-        }
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Title & Subtitle
+        // User greeting
+        if (currentUser != null && !showNameInput) {
+            Text(
+                text = "Halo, ${currentUser!!.name}! 👋",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                textAlign = TextAlign.Start
+            )
+        }
+
+        // Title
         Text(
             text = "Pantau BMI Kamu",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground, // AUTOMATIC: Black in Light, White in Dark
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
-            lineHeight = 36.sp
+            lineHeight = 36.sp,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Subtitle
         Text(
-            text = "Hitung dan monitor kesehatan badan Anda dengan mudah",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, // AUTOMATIC: Dark Gray in Light, Light Gray in Dark
+            text = "Atur kesehatan Anda dengan mengetahui status BMI",
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            lineHeight = 20.sp
+            lineHeight = 20.sp,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // Input Card
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface // AUTOMATIC: White in Light, Medium Gray in Dark
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
             Column(
-                modifier = Modifier.padding(28.dp)
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Height Input
                 Text(
-                    text = "Hitung BMI Kamu",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface, // Text inside card
-                    lineHeight = 30.sp
-                )
-
-                Spacer(modifier = Modifier.height(28.dp))
-
-                // Input Height
-                Text(
-                    text = "Tinggi Badan",
-                    fontSize = 13.sp,
+                    text = "Tinggi Badan (cm)",
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 10.dp)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
                 )
 
                 OutlinedTextField(
                     value = input.height,
                     onValueChange = { inputViewModel.updateHeight(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text("Contoh: 170 cm", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
+                    placeholder = { Text("Contoh: 170") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = Gray200,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface, // Matches card color
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface, // User input text
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background
                     ),
-                    textStyle = TextStyle(fontSize = 14.sp)
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp)
                 )
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Input Weight
+                // Weight Input
                 Text(
-                    text = "Berat Badan",
-                    fontSize = 13.sp,
+                    text = "Berat Badan (kg)",
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 10.dp)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
                 )
 
                 OutlinedTextField(
                     value = input.weight,
                     onValueChange = { inputViewModel.updateWeight(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text("Contoh: 65 kg", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
+                    placeholder = { Text("Contoh: 65") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = Gray200,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background
                     ),
-                    textStyle = TextStyle(fontSize = 14.sp)
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp)
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -182,8 +195,12 @@ fun HomeScreen(
                 Button(
                     onClick = {
                         inputViewModel.calculateBMI { summary ->
-                            // Save to ResultViewModel via MainActivity
-                            onNavigateToResult()
+                            // Save to database immediately with current user ID
+                            if (currentUser != null && currentUser!!.id > 0 && resultViewModel != null) {
+                                resultViewModel.saveToHistory(summary, currentUser!!.id)
+                            }
+                            // Navigate to result
+                            onNavigateToResult(summary)
                         }
                     },
                     modifier = Modifier
@@ -208,7 +225,7 @@ fun HomeScreen(
                         )
                     } else {
                         Text(
-                            text = "Cek Hasilnya",
+                            text = "Hitung BMI",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White,
@@ -218,5 +235,148 @@ fun HomeScreen(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Info Card - Dynamic tips based on latest BMI
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (lastBmi != null) {
+                    when (lastBmi!!.category.name) {
+                        "UNDERWEIGHT" -> Color(0xFF3B82F6).copy(alpha = 0.1f)
+                        "NORMAL" -> GreenPrimary.copy(alpha = 0.1f)
+                        "OVERWEIGHT" -> Color(0xFFF59E0B).copy(alpha = 0.1f)
+                        "OBESE" -> Color(0xFFEF4444).copy(alpha = 0.1f)
+                        else -> GreenPrimary.copy(alpha = 0.1f)
+                    }
+                } else {
+                    GreenPrimary.copy(alpha = 0.1f)
+                }
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = if (lastBmi != null) "📊 Hasil Terakhir" else "💡 Tip Kesehatan",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (lastBmi != null) {
+                        when (lastBmi!!.category.name) {
+                            "UNDERWEIGHT" -> Color(0xFF3B82F6)
+                            "NORMAL" -> GreenPrimary
+                            "OVERWEIGHT" -> Color(0xFFF59E0B)
+                            "OBESE" -> Color(0xFFEF4444)
+                            else -> GreenPrimary
+                        }
+                    } else {
+                        GreenPrimary
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                if (lastBmi != null) {
+                    // Show latest BMI info
+                    Text(
+                        text = "BMI Terakhir: ${String.format("%.1f", lastBmi!!.bmi)} (${lastBmi!!.category.displayName})",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Text(
+                        text = lastBmi!!.category.advice,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
+                } else {
+                    // Show general tip if no history
+                    Text(
+                        text = "Pertahankan BMI normal antara 18.5-24.9 untuk kesehatan optimal. Konsultasikan dengan dokter jika Anda memiliki kekhawatiran kesehatan.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+    }
+
+    // Dialog untuk input nama user (hanya tampil jika belum punya nama)
+    if (showNameInput) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(
+                    text = "Selamat Datang! 👋",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Silakan masukkan nama Anda untuk memulai",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        lineHeight = 20.sp
+                    )
+                    OutlinedTextField(
+                        value = inputName,
+                        onValueChange = { inputName = it },
+                        placeholder = { Text("Contoh: Ahmad") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.background
+                        ),
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (inputName.isNotBlank()) {
+                            userViewModel?.saveUserName(inputName)
+                        }
+                    },
+                    enabled = inputName.isNotBlank() && !isLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenPrimary
+                    ),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Mulai", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     }
 }
+

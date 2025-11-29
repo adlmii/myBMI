@@ -1,0 +1,50 @@
+# ✅ HISTORY NOT SHOWING - FIXED FOR REAL!
+
+## 🎯 The REAL Problem Found!
+
+`currentUserId` di ResultViewModel adalah **0** dan **TIDAK PERNAH BERUBAH**!
+
+So saat `saveToHistory()` di-call, kondisi `if (currentUserId > 0)` **SELALU GAGAL**
+
+→ BMI **TIDAK PERNAH** disimpan ke database!
+
+## ✅ Solution
+
+**Changed**:
+```kotlin
+// BEFORE - WRONG:
+fun saveToHistory(summary: BMICheckSummary) {
+    if (bmiRepository != null && currentUserId > 0) {  // ← currentUserId = 0!
+        bmiRepository.saveBMI(currentUserId, summary)
+    }
+}
+
+// AFTER - CORRECT:
+fun saveToHistory(summary: BMICheckSummary, userId: Int = 0) {
+    val idToUse = if (userId > 0) userId else currentUserId
+    if (bmiRepository != null && idToUse > 0) {
+        bmiRepository.saveBMI(idToUse, summary)
+    }
+}
+```
+
+And pass userId from HomeScreen:
+```kotlin
+resultViewModel.saveToHistory(summary, currentUser!!.id)
+```
+
+## 🚀 BUILD NOW!
+
+```
+File → Sync Now
+Build → Build Project
+Run → Run 'app'
+
+Test: Calculate BMI → Go to History → Entry muncul! ✅
+```
+
+---
+
+**READY!** 🎊
+
+

@@ -1,6 +1,5 @@
 package af.mobile.mybmi.model
 
-import java.util.Date
 
 // Data class untuk input BMI
 data class BMICheckInput(
