@@ -1,30 +1,28 @@
 package af.mobile.mybmi.ui.splash
 
-import af.mobile.mybmi.theme.GreenPrimary
 import af.mobile.mybmi.R
+import af.mobile.mybmi.theme.GreenPrimary
 import af.mobile.mybmi.viewmodel.UserViewModel
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
 
 @Composable
@@ -32,66 +30,113 @@ fun SplashScreen(
     onNavigateToHome: () -> Unit,
     userViewModel: UserViewModel? = null
 ) {
-    // Auto navigate after 2 seconds
+    // Navigasi otomatis setelah 2.5 detik
     LaunchedEffect(Unit) {
-        delay(2000)
+        delay(2500)
         onNavigateToHome()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        GreenPrimary,
+                        Color(0xFF34D399) // GreenLight manually defined to match theme feel
+                    )
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
+        // 1. ELEMEN DEKORATIF (Lingkaran Transparan)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 60.dp, y = (-60).dp)
+                .size(200.dp)
+                .background(Color.White.copy(alpha = 0.1f), CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = (-60).dp, y = 60.dp)
+                .size(200.dp)
+                .background(Color.White.copy(alpha = 0.1f), CircleShape)
+        )
+
+        // 2. KONTEN UTAMA
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .fillMaxWidth()
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(24.dp)
         ) {
-            Spacer(modifier = Modifier.height(80.dp))
-
-            // Logo
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "myBMI Logo",
-                modifier = Modifier.size(160.dp)
-            )
+            // LOGO CARD (White Container with Shadow)
+            Card(
+                modifier = Modifier
+                    .size(140.dp)
+                    .shadow(
+                        elevation = 16.dp,
+                        spotColor = Color.Black.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(32.dp)
+                    ),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "myBMI Logo",
+                        modifier = Modifier
+                            .size(100.dp) // Ukuran logo di dalam card
+                            .padding(12.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // App Title
+            // APP NAME
             Text(
                 text = "myBMI",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontSize = 36.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White,
+                letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Subtitle
+            // TAGLINE
             Text(
-                text = "Pantau Kesehatan Tubuhmu dengan Mudah",
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp
+                text = "Health Tracker & Analyzer",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.9f)
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Loading indicator or footer text
-            Text(
-                text = "Loading...",
-                fontSize = 12.sp,
-                color = GreenPrimary,
-                fontWeight = FontWeight.Medium
+            // LOADING INDICATOR
+            CircularProgressIndicator(
+                color = Color.White,
+                modifier = Modifier.size(32.dp),
+                strokeWidth = 3.dp,
+                trackColor = Color.White.copy(alpha = 0.3f)
             )
-
-            Spacer(modifier = Modifier.height(60.dp))
         }
+
+        // 3. FOOTER VERSION
+        Text(
+            text = "Versi 1.0.0",
+            fontSize = 12.sp,
+            color = Color.White.copy(alpha = 0.6f),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp)
+        )
     }
 }

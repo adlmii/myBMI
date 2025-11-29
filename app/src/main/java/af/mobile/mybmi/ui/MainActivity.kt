@@ -1,8 +1,5 @@
 package af.mobile.mybmi.ui
 
-import af.mobile.mybmi.theme.MintLight
-import af.mobile.mybmi.theme.DarkGreenLovely
-import af.mobile.mybmi.theme.getNavBarColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,8 +20,6 @@ import af.mobile.mybmi.ui.result.ResultScreen
 import af.mobile.mybmi.ui.settings.SettingsScreen
 import af.mobile.mybmi.viewmodel.InputViewModel
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +34,11 @@ import af.mobile.mybmi.R
 import af.mobile.mybmi.database.BMIRepository
 import af.mobile.mybmi.database.MyBMIDatabase
 import af.mobile.mybmi.database.UserRepository
+import af.mobile.mybmi.theme.getNavBarContainerColor
+import af.mobile.mybmi.theme.getNavBarIndicatorColor
+import af.mobile.mybmi.theme.getNavBarSelectedIconColor
+import af.mobile.mybmi.theme.getNavBarSelectedTextColor
+import af.mobile.mybmi.theme.getNavBarUnselectedContentColor
 import af.mobile.mybmi.ui.splash.SplashScreen
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.ResultViewModelFactory
@@ -49,6 +49,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.shadow
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,7 +165,11 @@ fun MyBMIApp(
                 )
             }
             composable(Screen.Result.route) {
-                ResultScreen(onNavigateBack = { navController.popBackStack() }, resultViewModel = resultViewModel)
+                ResultScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    resultViewModel = resultViewModel,
+                    userViewModel = userViewModel
+                )
             }
             composable(Screen.History.route) {
                 HistoryScreen(
@@ -195,15 +200,23 @@ fun BottomNavigationBar(
     currentRoute: String?,
     isDarkMode: Boolean = false
 ) {
+    // 1. AMBIL WARNA DARI THEME/COLOR.KT 🎨
+    val containerColor = getNavBarContainerColor(isDarkMode)
+    val indicatorColor = getNavBarIndicatorColor(isDarkMode)
 
-    val selectedColor = Color.White
+    // Kita pisahkan warna untuk Icon dan Text saat Selected
+    val selectedIconColor = getNavBarSelectedIconColor(isDarkMode)
+    val selectedTextColor = getNavBarSelectedTextColor(isDarkMode)
 
-    val unselectedColor = if (isDarkMode) Color.Gray else MintLight
+    val unselectedColor = getNavBarUnselectedContentColor(isDarkMode)
 
-    val indicatorColor = if (isDarkMode) DarkGreenLovely else Color.White.copy(alpha = 0.2f)
-
+    // 2. LAYOUT NAVBAR
     NavigationBar(
-        containerColor = getNavBarColor(isDarkMode), // Akan hijau di Light Mode
+        containerColor = containerColor,
+        modifier = Modifier.shadow(
+            elevation = 16.dp,
+            spotColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.1f)
+        ),
         tonalElevation = 0.dp
     ) {
         val items = listOf(
@@ -216,22 +229,27 @@ fun BottomNavigationBar(
             val isSelected = currentRoute == item.route
 
             NavigationBarItem(
+                // Konfigurasi Icon
                 icon = {
                     Image(
                         painter = painterResource(id = item.iconRes),
                         contentDescription = item.label,
                         modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(
-                            if (isSelected) selectedColor else unselectedColor
+                        // Warna Icon: Hijau jika selected (dalam pill), Putih pudar jika tidak
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                            if (isSelected) selectedIconColor else unselectedColor
                         )
                     )
                 },
+                // Konfigurasi Label Text
                 label = {
                     Text(
                         text = item.label,
-                        fontSize = 12.sp,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                        color = if (isSelected) selectedColor else unselectedColor
+                        fontSize = 11.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        // Warna Text: Putih Tegas jika selected, Putih Pudar jika tidak
+                        // (Sebelumnya ini ikut warna hijau sehingga hilang)
+                        color = if (isSelected) selectedTextColor else unselectedColor
                     )
                 },
                 selected = isSelected,
@@ -244,12 +262,13 @@ fun BottomNavigationBar(
                         }
                     }
                 },
+                // Override default colors agar tidak menimpa settingan manual kita
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = selectedColor,
-                    selectedTextColor = selectedColor,
+                    indicatorColor = indicatorColor,
+                    selectedIconColor = selectedIconColor,
+                    selectedTextColor = selectedTextColor,
                     unselectedIconColor = unselectedColor,
-                    unselectedTextColor = unselectedColor,
-                    indicatorColor = indicatorColor
+                    unselectedTextColor = unselectedColor
                 )
             )
         }

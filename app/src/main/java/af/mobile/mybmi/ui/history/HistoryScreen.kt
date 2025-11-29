@@ -3,37 +3,27 @@ package af.mobile.mybmi.ui.history
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.background
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HistoryScreen(
@@ -44,7 +34,6 @@ fun HistoryScreen(
     val history by resultViewModel.history.collectAsState()
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
-    // Load history when screen is first composed or when user changes
     LaunchedEffect(currentUser?.id) {
         if (currentUser != null && currentUser!!.id > 0) {
             resultViewModel.loadHistory(currentUser!!.id)
@@ -55,54 +44,38 @@ fun HistoryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 24.dp)
     ) {
+        // 1. SIMPLE HEADER (Tanpa Background Gradient)
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "📊 Riwayat BMI",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            lineHeight = 36.sp
+            text = "Riwayat",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Perjalanan kesehatanmu sejauh ini",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
-
+        // 2. LIST CONTENT
         if (history.isEmpty()) {
-            // Empty state
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "📊",
-                        fontSize = 56.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Belum ada riwayat",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Hitung BMI Anda terlebih dahulu",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 20.sp
-                    )
-                }
+                EmptyStateCard()
             }
         } else {
-            // History list
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 100.dp) // Ruang untuk scroll
             ) {
                 items(history) { summary ->
-                    HistoryCard(
+                    ModernHistoryCard(
                         summary = summary,
                         onClick = {
                             resultViewModel.selectHistory(summary)
@@ -116,62 +89,107 @@ fun HistoryScreen(
 }
 
 @Composable
-private fun HistoryCard(
+private fun ModernHistoryCard(
     summary: BMICheckSummary,
     onClick: () -> Unit
 ) {
+    // KARTU MODERN: Shadow halus, rounded corner, layout bersih
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                spotColor = Color.Black.copy(alpha = 0.05f), // Bayangan sangat halus
+                shape = RoundedCornerShape(20.dp)
+            )
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface // Auto Card Color
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = summary.getDateFormatted(),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface, // Text inside card
-                    lineHeight = 22.sp
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${summary.getTimeFormatted()} • BMI: ${summary.bmi}",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, // Secondary text inside card
-                    lineHeight = 18.sp
+                    text = "BMI: ${summary.bmi} • ${summary.weight} kg",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            // Category badge
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = Color(android.graphics.Color.parseColor(summary.category.colorHex))
-                            .copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            // Badge Kategori Minimalis
+            Surface(
+                color = Color(android.graphics.Color.parseColor(summary.category.colorHex)).copy(alpha = 0.1f),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
                     text = summary.category.displayName,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Color(android.graphics.Color.parseColor(summary.category.colorHex)),
-                    lineHeight = 16.sp
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyStateCard() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.offset(y = (-40).dp) // Sedikit naik ke atas agar center visual
+    ) {
+        // ICON STYLE: Circle with Shadow & Glow (Sama seperti Profile/Dialog)
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .shadow(16.dp, shape = CircleShape)
+                .background(Color.White, shape = CircleShape)
+                .padding(4.dp) // Border Putih
+                .clip(CircleShape)
+                .background(af.mobile.mybmi.theme.GreenPrimary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.DateRange, // Icon Kalender/Riwayat
+                contentDescription = "Empty History",
+                tint = af.mobile.mybmi.theme.GreenPrimary,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Belum ada riwayat",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Data akan muncul di sini setelah\nAnda menghitung BMI",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
+        )
     }
 }
