@@ -1,6 +1,7 @@
 package af.mobile.mybmi.screens.settings
 
 import af.mobile.mybmi.components.ModernDialogContainer
+import af.mobile.mybmi.components.StandardScreenLayout
 import af.mobile.mybmi.theme.BrandPrimary
 import af.mobile.mybmi.viewmodel.ThemeViewModel
 import androidx.compose.foundation.background
@@ -32,133 +33,72 @@ fun SettingsScreen(
     themeViewModel: ThemeViewModel = viewModel()
 ) {
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
-
     var showPrivacyDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Pengaturan") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        // --- UPDATE ICON INI ---
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(24.dp)
+    StandardScreenLayout(
+        title = "Pengaturan",
+        onBack = onNavigateBack
+    ) {
+        // --- SEKSI TAMPILAN ---
+        Text(
+            text = "Tampilan",
+            style = MaterialTheme.typography.labelLarge,
+            color = BrandPrimary,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            // APPEARANCE SECTION
-            Text(
-                text = "Tampilan",
-                style = MaterialTheme.typography.labelLarge,
-                color = BrandPrimary,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Rounded.DarkMode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Mode Gelap",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface // Aman di Dark Mode
-                        )
-                        Text(
-                            "Sesuaikan dengan kenyamanan mata",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = isDarkMode,
-                        onCheckedChange = { themeViewModel.toggleDarkMode() },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = BrandPrimary,
-                            checkedTrackColor = BrandPrimary.copy(alpha = 0.3f)
-                        )
-                    )
+                Icon(Icons.Rounded.DarkMode, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Mode Gelap", style = MaterialTheme.typography.titleMedium)
+                    Text("Sesuaikan kenyamanan mata", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // ABOUT SECTION
-            Text(
-                text = "Tentang Aplikasi",
-                style = MaterialTheme.typography.labelLarge,
-                color = BrandPrimary,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                // Versi Aplikasi
-                ListItem(
-                    headlineContent = {
-                        Text("Versi Aplikasi", color = MaterialTheme.colorScheme.onSurface)
-                    },
-                    trailingContent = {
-                        Text("1.0.0", color = BrandPrimary, fontWeight = FontWeight.Bold)
-                    },
-                    leadingContent = {
-                        Icon(Icons.Rounded.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    },
-                    colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
-                )
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-
-                // Kebijakan Privasi
-                ListItem(
-                    modifier = Modifier.clickable { showPrivacyDialog = true },
-                    headlineContent = {
-                        Text("Kebijakan Privasi", color = MaterialTheme.colorScheme.onSurface)
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                Switch(
+                    checked = isDarkMode,
+                    onCheckedChange = { themeViewModel.toggleDarkMode() },
+                    colors = SwitchDefaults.colors(checkedThumbColor = BrandPrimary, checkedTrackColor = BrandPrimary.copy(alpha = 0.3f))
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // --- SEKSI TENTANG ---
+        Text(
+            text = "Tentang Aplikasi",
+            style = MaterialTheme.typography.labelLarge,
+            color = BrandPrimary,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            ListItem(
+                headlineContent = { Text("Versi Aplikasi") },
+                trailingContent = { Text("1.0.0", fontWeight = FontWeight.Bold, color = BrandPrimary) },
+                leadingContent = { Icon(Icons.Rounded.Info, null) },
+                colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            ListItem(
+                modifier = Modifier.clickable { showPrivacyDialog = true },
+                headlineContent = { Text("Kebijakan Privasi") },
+                leadingContent = { Icon(Icons.Rounded.Lock, null) },
+                colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+            )
+        }
     }
 
-    // Dialog Popup
     if (showPrivacyDialog) {
         PrivacyPolicyDialog(onDismiss = { showPrivacyDialog = false })
     }

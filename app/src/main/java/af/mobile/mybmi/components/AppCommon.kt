@@ -3,7 +3,10 @@ package af.mobile.mybmi.components
 import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.theme.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,4 +57,27 @@ fun getStatusColor(category: BMICategory): Color {
     }
 }
 
-// Fungsi getStatusBackgroundColor dihapus karena tidak digunakan.
+@Composable
+fun EmptyStateView(
+    message: String = "Belum ada data",
+    icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Rounded.Info
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.size(80.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}

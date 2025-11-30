@@ -1,11 +1,6 @@
 package af.mobile.mybmi.screens.profile
 
-import af.mobile.mybmi.components.GenderChip
-import af.mobile.mybmi.components.ImageSourceOption
-import af.mobile.mybmi.components.ModernAlertDialog
-import af.mobile.mybmi.components.ModernDialogContainer
-import af.mobile.mybmi.components.ModernClickableInput
-import af.mobile.mybmi.components.ModernInput
+import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.util.ImageUtils
 import af.mobile.mybmi.viewmodel.UserViewModel
@@ -28,17 +23,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -64,32 +55,23 @@ fun EditProfileScreen(
 ) {
     val currentUser by userViewModel.currentUser.collectAsState()
     val context = LocalContext.current
-    val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     // --- STATE FORM ---
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Laki-laki") }
-
-    // Menggunakan mutableLongStateOf
     var birthDateMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
-
     var profileImagePath by remember { mutableStateOf<String?>(null) }
 
-    // State Awal (untuk cek perubahan)
+    // State Awal (untuk cek perubahan unsaved changes)
     var initialName by remember { mutableStateOf("") }
     var initialGender by remember { mutableStateOf("") }
-
-    // Menggunakan mutableLongStateOf (0L sebagai marker 'belum diisi')
     var initialBirthDate by remember { mutableLongStateOf(0L) }
-
     var initialImagePath by remember { mutableStateOf<String?>(null) }
     var isDataLoaded by remember { mutableStateOf(false) }
 
     // Dialog State
     var showDatePicker by remember { mutableStateOf(false) }
     var showUnsavedDialog by remember { mutableStateOf(false) }
-
-    // --- STATE KAMERA & GALERI ---
     var showImageSourceDialog by remember { mutableStateOf(false) }
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -145,7 +127,7 @@ fun EditProfileScreen(
         imageCropLauncher.launch(cropOptions)
     }
 
-    // --- 2. CONFIG LAUNCHERS ---
+    // --- 2. CONFIG LAUNCHERS (Camera & Gallery) ---
     val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let { launchCropper(it) }
     }
@@ -201,61 +183,22 @@ fun EditProfileScreen(
     }
 
     // --- UI START ---
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+    StandardScreenLayout(
+        title = "Edit Profil",
+        onBack = { if (hasChanges) showUnsavedDialog = true else onNavigateBack() }
     ) {
-        // 1. HEADER GRADIENT
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .background(
-                    brush = Brush.verticalGradient(colors = listOf(GradientStart, GradientEnd)),
-                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
-                )
-        )
-
-        // 2. FORM SCROLLABLE
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            // HEADER TITLE
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 48.dp, start = 16.dp, end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { if (hasChanges) showUnsavedDialog = true else onNavigateBack() }) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = Color.White)
-                }
-                Text(
-                    text = "Edit Profil",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // PHOTO PROFILE (Floating)
+            // 1. PHOTO PROFILE (Centered & Clean)
             Box(contentAlignment = Alignment.BottomEnd) {
                 Box(
                     modifier = Modifier
                         .size(130.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface) // Border luar
-                        .padding(4.dp) // Ketebalan border
-                        .clip(CircleShape)
-                        .background(BrandPrimary.copy(alpha = 0.1f))
-                        .clickable { showImageSourceDialog = true }, // TRIGGER DIALOG
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { showImageSourceDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
                     if (profileImagePath != null) {
@@ -283,7 +226,7 @@ fun EditProfileScreen(
                         .clip(CircleShape)
                         .background(BrandSecondary)
                         .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                        .clickable { showImageSourceDialog = true }, // TRIGGER DIALOG
+                        .clickable { showImageSourceDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -297,16 +240,15 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // CARD FORM
+            // 2. FORM CARD
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .shadow(8.dp, spotColor = Color.Black.copy(alpha = 0.05f), shape = RoundedCornerShape(24.dp)),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
+                    // Input Nama
                     ModernInput(
                         label = "Nama Panggilan",
                         value = name,
@@ -317,6 +259,7 @@ fun EditProfileScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Input Gender
                     Text(
                         text = "Jenis Kelamin",
                         style = MaterialTheme.typography.labelMedium,
@@ -342,19 +285,14 @@ fun EditProfileScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    // Input Tanggal Lahir
                     val localeID = Locale.forLanguageTag("id-ID")
                     val sdf = SimpleDateFormat("dd MMMM yyyy", localeID)
-
-                    val dateString = if (birthDateMillis == 0L) {
-                        ""
-                    } else {
-                        sdf.format(Date(birthDateMillis))
-                    }
+                    val dateString = if (birthDateMillis == 0L) "" else sdf.format(Date(birthDateMillis))
 
                     ModernClickableInput(
                         label = "Tanggal Lahir",
                         value = dateString,
-                        // Menambahkan placeholder untuk UX yang lebih baik
                         placeholderText = "Pilih tanggal lahir Anda",
                         onClick = { showDatePicker = true }
                     )
@@ -363,8 +301,9 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // SAVE BUTTON
-            Button(
+            // 3. SAVE BUTTON (Menggunakan PrimaryButton)
+            PrimaryButton(
+                text = "Simpan Perubahan",
                 onClick = {
                     if (name.isNotBlank() && currentUser != null) {
                         val updatedUser = currentUser!!.copy(
@@ -378,24 +317,8 @@ fun EditProfileScreen(
                         onNavigateBack()
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .height(56.dp),
-
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = getActionButtonContainerColor(isDarkMode, hasChanges),
-                    contentColor = getActionButtonContentColor(hasChanges),
-                    disabledContainerColor = getActionButtonContainerColor(isDarkMode, false),
-                    disabledContentColor = getActionButtonContentColor(false)
-                ),
-                shape = RoundedCornerShape(16.dp),
                 enabled = hasChanges
-            ) {
-                Icon(Icons.Rounded.Save, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Simpan Perubahan", style = MaterialTheme.typography.titleMedium)
-            }
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }

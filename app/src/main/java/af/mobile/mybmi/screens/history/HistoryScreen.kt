@@ -1,29 +1,23 @@
 package af.mobile.mybmi.screens.history
 
-import af.mobile.mybmi.components.EmptyStateCard
-import af.mobile.mybmi.components.ModernHistoryCard
-import af.mobile.mybmi.components.ModernAlertDialog
+import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     onNavigateToDetail: () -> Unit,
@@ -42,21 +36,13 @@ fun HistoryScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-    ) {
-        // HEADER GRADIENT
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .background(
-                    brush = Brush.verticalGradient(colors = listOf(GradientStart, GradientEnd)),
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                )
-        ) {
+    GradientScreenLayout(
+        headerContent = {
+            // Judul Fixed di Header
             Column(
-                modifier = Modifier.align(Alignment.CenterStart).padding(24.dp)
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(24.dp)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -71,53 +57,60 @@ fun HistoryScreen(
                     color = Color.White.copy(alpha = 0.8f)
                 )
             }
-        }
+        },
+        content = {
+            // KONTEN
+            if (history.isEmpty()) {
+                // PERBAIKAN DI SINI:
+                // Gunakan Column dengan Spacer setinggi Header (300dp)
+                // agar EmptyStateCard turun ke area putih.
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(300.dp)) // Dorong ke bawah header
 
-        // LIST
-        if (history.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                EmptyStateCard()
-            }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(top = 24.dp, bottom = 100.dp, start = 24.dp, end = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item {
-                    Text(
-                        text = "Data Terakhir",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f), // Isi sisa layar ke bawah
+                        contentAlignment = Alignment.Center
+                    ) {
+                        EmptyStateCard()
+                    }
                 }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(top = 24.dp, bottom = 100.dp, start = 24.dp, end = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Item Spacer untuk mendorong list pertama ke bawah header
+                    item {
+                        Spacer(modifier = Modifier.height(280.dp))
+                    }
 
-                items(history) { summary ->
-                    ModernHistoryCard(
-                        summary = summary,
-                        onClick = {
-                            resultViewModel.selectHistory(summary)
-                            onNavigateToDetail()
-                        },
-                        onDelete = {
-                            itemToDelete = summary.id
-                            showDeleteDialog = true
-                        }
-                    )
+                    items(history) { summary ->
+                        ModernHistoryCard(
+                            summary = summary,
+                            onClick = {
+                                resultViewModel.selectHistory(summary)
+                                onNavigateToDetail()
+                            },
+                            onDelete = {
+                                itemToDelete = summary.id
+                                showDeleteDialog = true
+                            }
+                        )
+                    }
                 }
             }
         }
-    }
+    )
 
-    // --- GANTI DIALOG DI SINI ---
     if (showDeleteDialog && itemToDelete != null) {
         ModernAlertDialog(
-            onDismiss = {
-                showDeleteDialog = false
-                itemToDelete = null
-            },
+            onDismiss = { showDeleteDialog = false; itemToDelete = null },
             title = "Hapus Data?",
             description = "Data ini akan dihapus permanen dari riwayat Anda.",
             icon = Icons.Rounded.Delete,

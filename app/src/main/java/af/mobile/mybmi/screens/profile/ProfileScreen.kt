@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.profile
 
+import af.mobile.mybmi.components.GradientScreenLayout // Import Layout Baru
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.Image
@@ -15,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -31,24 +31,15 @@ fun ProfileScreen(
 ) {
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // HEADER
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .background(
-                    brush = Brush.verticalGradient(listOf(GradientStart, GradientEnd)),
-                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Avatar (Foto)
+    // MENGGUNAKAN LAYOUT GRADIENT BARU
+    GradientScreenLayout(
+        headerContent = {
+            // Isi Header (Avatar & Nama)
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Avatar Box
                 Box(
                     modifier = Modifier
                         .size(110.dp)
@@ -61,17 +52,12 @@ fun ProfileScreen(
                     if (currentUser?.profileImagePath != null) {
                         Image(
                             painter = rememberAsyncImagePainter(model = File(currentUser!!.profileImagePath!!)),
-                            contentDescription = "Profile Photo",
+                            contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp),
-                            tint = BrandPrimary
-                        )
+                        Icon(Icons.Rounded.Person, null, modifier = Modifier.size(50.dp), tint = BrandPrimary)
                     }
                 }
 
@@ -83,47 +69,38 @@ fun ProfileScreen(
                     color = Color.White
                 )
 
-                // Info Tambahan (UPDATED)
                 if (currentUser != null) {
                     Text(
-                        // Menggunakan helper function yang menangani status 0L
                         text = "${currentUser!!.gender} • ${currentUser!!.getAgeDisplayString()}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f)
                     )
                 }
             }
-        }
+        },
+        content = {
+            // Isi Konten di Bawah Header
+            // Kita beri Spacer agar konten mulai di bawah lengkungan header (approx 300dp)
+            Spacer(modifier = Modifier.height(300.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Text(
-                text = "Akun Saya",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                ProfileMenuItem(
-                    icon = Icons.Rounded.Edit,
-                    title = "Ubah Profil",
-                    onClick = onNavigateToEdit
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Akun Saya",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-                // FIX: Mengganti Divider dengan HorizontalDivider
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
-                ProfileMenuItem(
-                    icon = Icons.Rounded.Settings,
-                    title = "Pengaturan",
-                    onClick = onNavigateToSettings
-                )
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    ProfileMenuItem(Icons.Rounded.Edit, "Ubah Profil", onNavigateToEdit)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    ProfileMenuItem(Icons.Rounded.Settings, "Pengaturan", onNavigateToSettings)
+                }
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -135,14 +112,9 @@ fun ProfileMenuItem(icon: ImageVector, title: String, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = BrandPrimary)
+        Icon(icon, null, tint = BrandPrimary)
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
