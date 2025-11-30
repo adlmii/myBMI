@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.home
 
+import af.mobile.mybmi.components.ModernDialogContainer
 import af.mobile.mybmi.components.ModernInput
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.theme.*
@@ -23,8 +24,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -189,40 +190,71 @@ fun HomeScreen(
 @Composable
 fun NameInputDialog(onConfirm: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    Dialog(onDismissRequest = {}) {
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+
+    // Menggunakan Template ModernDialogContainer
+    ModernDialogContainer(onDismiss = {}) { // onDismiss kosong agar user tidak bisa menutup paksa tanpa isi nama
+        // 1. Header Icon (Style Seragam)
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .background(BrandPrimary.copy(alpha = 0.1f), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    tint = BrandPrimary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Siapa namamu?", style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nama Panggilan") },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = { if (name.isNotBlank()) onConfirm(name) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
-                ) {
-                    Text("Mulai")
-                }
-            }
+            Icon(
+                imageVector = Icons.Rounded.Person,
+                contentDescription = null,
+                tint = BrandPrimary,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 2. Title & Description
+        Text(
+            text = "Selamat Datang!",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Siapa nama panggilanmu?",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 3. Input Field (Styling disesuaikan)
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            placeholder = { Text("Contoh: Budi") },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = BrandPrimary,
+                cursorColor = BrandPrimary
+            ),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 4. Button
+        Button(
+            onClick = { if (name.isNotBlank()) onConfirm(name) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BrandPrimary,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Mulai Sekarang", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
