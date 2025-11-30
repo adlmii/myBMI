@@ -29,6 +29,23 @@ object ImageUtils {
         } catch (e: Exception) { e.printStackTrace(); null }
     }
 
+    // Dapatkan URI Sementara untuk Menyimpan Gambar
+    fun getTempUri(context: Context): Uri {
+        val directory = File(context.cacheDir, "images")
+        directory.mkdirs()
+        val file = File.createTempFile(
+            "selected_image_",
+            ".jpg",
+            directory
+        )
+        val authority = context.packageName + ".provider"
+        return androidx.core.content.FileProvider.getUriForFile(
+            context,
+            authority,
+            file
+        )
+    }
+
     // --- FUNGSI SCREENSHOT BARU (MANUAL & STABIL) ---
 
     // 1. Mengubah View Android menjadi Bitmap

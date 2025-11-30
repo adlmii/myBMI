@@ -9,7 +9,7 @@ data class UserEntity(
     val id: Int = 0,
     val name: String,
     val gender: String = "Laki-laki",
-    val birthDate: Long = System.currentTimeMillis(),
+    val birthDate: Long = 0L,
     val profileImagePath: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

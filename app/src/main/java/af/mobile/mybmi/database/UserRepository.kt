@@ -36,5 +36,13 @@ class UserRepository(private val userDao: UserDao) {
     suspend fun hasUser(): Boolean {
         return getUserCount() > 0
     }
+
+    suspend fun getOrCreateUser(): UserEntity {
+        return userDao.getLatestUser() ?: run {
+            val newUserId = userDao.insertUser(UserEntity(name = ""))
+            userDao.getUserById(newUserId.toInt())!!
+        }
+    }
+
 }
 

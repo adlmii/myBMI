@@ -1,6 +1,9 @@
 package af.mobile.mybmi.screens.profile
 
 import af.mobile.mybmi.components.GenderChip
+import af.mobile.mybmi.components.ImageSourceOption
+import af.mobile.mybmi.components.ModernAlertDialog
+import af.mobile.mybmi.components.ModernDialogContainer
 import af.mobile.mybmi.components.ModernClickableInput
 import af.mobile.mybmi.components.ModernInput
 import af.mobile.mybmi.theme.*
@@ -25,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,12 +39,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.canhub.cropper.CropImageContract
@@ -59,26 +64,34 @@ fun EditProfileScreen(
 ) {
     val currentUser by userViewModel.currentUser.collectAsState()
     val context = LocalContext.current
-
-    // Deteksi Dark Mode untuk helper warna
     val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     // --- STATE FORM ---
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Laki-laki") }
-    var birthDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    // Menggunakan mutableLongStateOf
+    var birthDateMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
     var profileImagePath by remember { mutableStateOf<String?>(null) }
 
     // State Awal (untuk cek perubahan)
     var initialName by remember { mutableStateOf("") }
     var initialGender by remember { mutableStateOf("") }
-    var initialBirthDate by remember { mutableStateOf(0L) }
+
+    // Menggunakan mutableLongStateOf (0L sebagai marker 'belum diisi')
+    var initialBirthDate by remember { mutableLongStateOf(0L) }
+
     var initialImagePath by remember { mutableStateOf<String?>(null) }
     var isDataLoaded by remember { mutableStateOf(false) }
 
     // Dialog State
     var showDatePicker by remember { mutableStateOf(false) }
     var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    // --- STATE KAMERA & GALERI ---
+    var showImageSourceDialog by remember { mutableStateOf(false) }
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = birthDateMillis)
 
@@ -105,7 +118,7 @@ fun EditProfileScreen(
 
     BackHandler(enabled = hasChanges) { showUnsavedDialog = true }
 
-    // --- LAUNCHERS ---
+    // --- 1. CONFIG CROPPER ---
     val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
             result.uriContent?.let { uri ->
@@ -114,28 +127,36 @@ fun EditProfileScreen(
         }
     }
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        uri?.let {
-            val cropOptions = CropImageContractOptions(
-                it,
-                CropImageOptions(
-                    imageSourceIncludeGallery = false,
-                    imageSourceIncludeCamera = false,
-                    cropShape = CropImageView.CropShape.OVAL,
-                    fixAspectRatio = true,
-                    aspectRatioX = 1,
-                    aspectRatioY = 1,
-
-                    toolbarColor = android.graphics.Color.parseColor("#00C9A7"),
-                    activityMenuIconColor = android.graphics.Color.WHITE,
-                    activityBackgroundColor = android.graphics.Color.parseColor("#121212")
-                )
+    fun launchCropper(uri: Uri) {
+        val cropOptions = CropImageContractOptions(
+            uri,
+            CropImageOptions(
+                imageSourceIncludeGallery = false,
+                imageSourceIncludeCamera = false,
+                cropShape = CropImageView.CropShape.OVAL,
+                fixAspectRatio = true,
+                aspectRatioX = 1,
+                aspectRatioY = 1,
+                toolbarColor = "#00C9A7".toColorInt(),
+                activityMenuIconColor = android.graphics.Color.WHITE,
+                activityBackgroundColor = "#121212".toColorInt()
             )
-            imageCropLauncher.launch(cropOptions)
+        )
+        imageCropLauncher.launch(cropOptions)
+    }
+
+    // --- 2. CONFIG LAUNCHERS ---
+    val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        uri?.let { launchCropper(it) }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && tempCameraUri != null) {
+            launchCropper(tempCameraUri!!)
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+    val galleryPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
             photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } else {
@@ -143,19 +164,43 @@ fun EditProfileScreen(
         }
     }
 
-    fun checkPermissionAndOpenGallery() {
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            val uri = ImageUtils.getTempUri(context)
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Izin kamera dibutuhkan", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // --- 3. LOGIKA KLIK UTAMA ---
+    fun onGalleryClick() {
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
+
         if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
             photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } else {
-            permissionLauncher.launch(permission)
+            galleryPermissionLauncher.launch(permission)
         }
     }
 
+    fun onCameraClick() {
+        val permission = Manifest.permission.CAMERA
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            val uri = ImageUtils.getTempUri(context)
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            cameraPermissionLauncher.launch(permission)
+        }
+    }
+
+    // --- UI START ---
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -179,7 +224,7 @@ fun EditProfileScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // HEADER TITLE (Manual TopBar agar menyatu dengan gradient)
+            // HEADER TITLE
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -187,7 +232,7 @@ fun EditProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { if (hasChanges) showUnsavedDialog = true else onNavigateBack() }) {
-                    Icon(Icons.Rounded.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = Color.White)
                 }
                 Text(
                     text = "Edit Profil",
@@ -210,7 +255,7 @@ fun EditProfileScreen(
                         .padding(4.dp) // Ketebalan border
                         .clip(CircleShape)
                         .background(BrandPrimary.copy(alpha = 0.1f))
-                        .clickable { checkPermissionAndOpenGallery() },
+                        .clickable { showImageSourceDialog = true }, // TRIGGER DIALOG
                     contentAlignment = Alignment.Center
                 ) {
                     if (profileImagePath != null) {
@@ -238,7 +283,7 @@ fun EditProfileScreen(
                         .clip(CircleShape)
                         .background(BrandSecondary)
                         .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                        .clickable { checkPermissionAndOpenGallery() },
+                        .clickable { showImageSourceDialog = true }, // TRIGGER DIALOG
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -297,12 +342,20 @@ fun EditProfileScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    val sdf = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
-                    val dateString = sdf.format(Date(birthDateMillis))
+                    val localeID = Locale.forLanguageTag("id-ID")
+                    val sdf = SimpleDateFormat("dd MMMM yyyy", localeID)
+
+                    val dateString = if (birthDateMillis == 0L) {
+                        ""
+                    } else {
+                        sdf.format(Date(birthDateMillis))
+                    }
 
                     ModernClickableInput(
                         label = "Tanggal Lahir",
                         value = dateString,
+                        // Menambahkan placeholder untuk UX yang lebih baik
+                        placeholderText = "Pilih tanggal lahir Anda",
                         onClick = { showDatePicker = true }
                     )
                 }
@@ -318,8 +371,7 @@ fun EditProfileScreen(
                             name = name,
                             gender = gender,
                             birthDate = birthDateMillis,
-                            profileImagePath = profileImagePath,
-                            updatedAt = System.currentTimeMillis()
+                            profileImagePath = profileImagePath
                         )
                         userViewModel.updateUserFull(updatedUser)
                         Toast.makeText(context, "Profil Berhasil Diperbarui", Toast.LENGTH_SHORT).show()
@@ -350,26 +402,80 @@ fun EditProfileScreen(
     }
 
     // --- DIALOGS ---
-    if (showUnsavedDialog) {
-        AlertDialog(
-            onDismissRequest = { showUnsavedDialog = false },
-            title = { Text("Batalkan Perubahan?") },
-            text = { Text("Anda memiliki perubahan yang belum disimpan. Yakin ingin kembali?") },
-            containerColor = MaterialTheme.colorScheme.surface,
-            confirmButton = {
-                Button(
-                    onClick = { showUnsavedDialog = false; onNavigateBack() },
-                    colors = ButtonDefaults.buttonColors(containerColor = StatusObese)
-                ) { Text("Ya, Keluar", color = Color.White) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUnsavedDialog = false }) {
-                    Text("Batal", color = MaterialTheme.colorScheme.onSurface)
+
+    // 1. IMAGE SOURCE DIALOG
+    if (showImageSourceDialog) {
+        ModernDialogContainer(onDismiss = { showImageSourceDialog = false }) {
+            Text(
+                text = "Ubah Foto Profil",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Pilih foto baru dari galeri atau ambil langsung dengan kamera.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            ImageSourceOption(
+                icon = Icons.Rounded.CameraAlt,
+                title = "Ambil Foto",
+                subtitle = "Gunakan kamera",
+                onClick = {
+                    showImageSourceDialog = false
+                    onCameraClick()
                 }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ImageSourceOption(
+                icon = Icons.Rounded.PhotoLibrary,
+                title = "Pilih dari Galeri",
+                subtitle = "Cari di penyimpanan",
+                onClick = {
+                    showImageSourceDialog = false
+                    onGalleryClick()
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TextButton(
+                onClick = { showImageSourceDialog = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Batal",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+
+    // 2. UNSAVED DIALOG
+    if (showUnsavedDialog) {
+        ModernAlertDialog(
+            onDismiss = { showUnsavedDialog = false },
+            title = "Batalkan Perubahan?",
+            description = "Anda memiliki perubahan yang belum disimpan. Yakin ingin kembali?",
+            icon = Icons.Rounded.EditOff,
+            mainColor = StatusObese,
+            positiveText = "Ya, Keluar",
+            onPositive = {
+                showUnsavedDialog = false
+                onNavigateBack()
             }
         )
     }
 
+    // 3. DATE PICKER
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },

@@ -2,6 +2,7 @@ package af.mobile.mybmi.screens.history
 
 import af.mobile.mybmi.components.EmptyStateCard
 import af.mobile.mybmi.components.ModernHistoryCard
+import af.mobile.mybmi.components.ModernAlertDialog
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +33,6 @@ fun HistoryScreen(
     val history by resultViewModel.history.collectAsState()
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
-    // State Dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<String?>(null) }
 
@@ -41,39 +43,32 @@ fun HistoryScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
-        // HEADER
+        // HEADER GRADIENT
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
                 .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(GradientStart, GradientEnd)
-                    ),
+                    brush = Brush.verticalGradient(colors = listOf(GradientStart, GradientEnd)),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                 )
         ) {
             Column(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(24.dp)
+                modifier = Modifier.align(Alignment.CenterStart).padding(24.dp)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "Riwayat Kesehatan",
                     style = MaterialTheme.typography.headlineMedium,
-                    // FIX: Pakai Color.White langsung karena backgroundnya Gradient fix
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Perjalanan sehatmu tercatat di sini",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f) // Putih transparan
+                    color = Color.White.copy(alpha = 0.8f)
                 )
             }
         }
@@ -116,35 +111,22 @@ fun HistoryScreen(
         }
     }
 
-    // DIALOG HAPUS
+    // --- GANTI DIALOG DI SINI ---
     if (showDeleteDialog && itemToDelete != null) {
-        AlertDialog(
-            onDismissRequest = {
+        ModernAlertDialog(
+            onDismiss = {
                 showDeleteDialog = false
                 itemToDelete = null
             },
-            title = { Text("Hapus Data?", color = MaterialTheme.colorScheme.onSurface) },
-            text = { Text("Data ini akan dihapus permanen.", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-            containerColor = MaterialTheme.colorScheme.surface,
-            confirmButton = {
-                Button(
-                    onClick = {
-                        itemToDelete?.let { resultViewModel.deleteHistory(it) }
-                        showDeleteDialog = false
-                        itemToDelete = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = StatusObese)
-                ) {
-                    Text("Hapus", color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    itemToDelete = null
-                }) {
-                    Text("Batal", color = MaterialTheme.colorScheme.onSurface)
-                }
+            title = "Hapus Data?",
+            description = "Data ini akan dihapus permanen dari riwayat Anda.",
+            icon = Icons.Rounded.Delete,
+            mainColor = StatusObese,
+            positiveText = "Hapus",
+            onPositive = {
+                itemToDelete?.let { resultViewModel.deleteHistory(it) }
+                showDeleteDialog = false
+                itemToDelete = null
             }
         )
     }

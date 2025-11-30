@@ -3,7 +3,7 @@ package af.mobile.mybmi.components
 import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.theme.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +38,7 @@ fun DetailRow(label: String, value: String, isHighlight: Boolean = false) {
 
 @Composable
 fun CustomDivider() {
-    Divider(
+    HorizontalDivider(
         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
         thickness = 1.dp,
         modifier = Modifier.padding(vertical = 8.dp)
@@ -54,6 +54,4 @@ fun getStatusColor(category: BMICategory): Color {
     }
 }
 
-fun getStatusBackgroundColor(category: BMICategory): Color {
-    return getStatusColor(category).copy(alpha = 0.1f)
-}
+// Fungsi getStatusBackgroundColor dihapus karena tidak digunakan.

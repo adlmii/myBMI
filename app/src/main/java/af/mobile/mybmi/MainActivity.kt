@@ -89,16 +89,19 @@ fun MyBMIApp(
     val userViewModel = if (userViewModelFactory != null) {
         viewModel<UserViewModel>(factory = userViewModelFactory)
     } else {
+        // Fallback ViewModel, harusnya tidak terpanggil karena factory tidak null
         viewModel<UserViewModel>()
     }
 
     val currentUser by userViewModel.currentUser.collectAsState()
+    // currentUser sekarang bertipe UserProfile (dari update sebelumnya), jadi ID aman digunakan.
     val userId = currentUser?.id ?: 0
 
     val resultViewModelFactory = if (bmiRepository != null) ResultViewModelFactory(bmiRepository, userId) else null
     val resultViewModel = if (resultViewModelFactory != null) {
         viewModel<ResultViewModel>(factory = resultViewModelFactory)
     } else {
+        // Fallback ViewModel
         viewModel<ResultViewModel>()
     }
 
@@ -138,8 +141,8 @@ fun MyBMIApp(
                 SplashScreen(
                     onNavigateToHome = {
                         navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } }
-                    },
-                    userViewModel = userViewModel
+                    }
+                    // userViewModel = userViewModel <-- DIHAPUS, ini fix untuk Error 1
                 )
             }
             composable(Screen.Home.route) {
@@ -149,8 +152,7 @@ fun MyBMIApp(
                         navController.navigate(Screen.Result.route)
                     },
                     inputViewModel = inputViewModel,
-                    userViewModel = userViewModel,
-                    resultViewModel = resultViewModel
+                    userViewModel = userViewModel
                 )
             }
             composable(Screen.Result.route) {
@@ -172,7 +174,7 @@ fun MyBMIApp(
             }
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onNavigateToEdit = { navController.navigate(Screen.EditProfile.route) }, // <--- Connect
+                    onNavigateToEdit = { navController.navigate(Screen.EditProfile.route) },
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                     userViewModel = userViewModel
                 )

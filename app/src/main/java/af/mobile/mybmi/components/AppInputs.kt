@@ -85,7 +85,8 @@ fun ModernClickableInput(
     label: String,
     value: String,
     onClick: () -> Unit,
-    suffix: String = ""
+    suffix: String = "",
+    placeholderText: String = "" // PARAMETER BARU DITAMBAHKAN
 ) {
     Column(modifier = Modifier.padding(bottom = 16.dp)) {
         Text(
@@ -104,6 +105,14 @@ fun ModernClickableInput(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onClick() }, // Event Click di sini
+
+            // LOGIKA PLACEHOLDER BARU: Tampil jika value kosong
+            placeholder = {
+                if (value.isEmpty() && placeholderText.isNotEmpty()) {
+                    Text(placeholderText, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                }
+            },
+
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Rounded.CalendarToday,
@@ -134,7 +143,6 @@ fun ModernClickableInput(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenderChip(text: String, icon: ImageVector, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val bgColor = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)

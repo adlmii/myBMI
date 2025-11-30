@@ -10,15 +10,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,13 +32,10 @@ fun ResultScreen(
     val currentResult by resultViewModel.currentResult.collectAsState()
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
-    // Deteksi Dark Mode untuk tombol
     val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
-
     var isSaved by remember { mutableStateOf(false) }
     var showUnsavedDialog by remember { mutableStateOf(false) }
 
-    // Handle Back Press
     BackHandler(enabled = !isSaved) {
         showUnsavedDialog = true
     }
@@ -57,7 +51,8 @@ fun ResultScreen(
                         IconButton(onClick = {
                             if (isSaved) onNavigateBack() else showUnsavedDialog = true
                         }) {
-                            Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                            // PERBAIKAN: Menggunakan AutoMirrored.Rounded.ArrowBack
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -104,7 +99,7 @@ fun ResultScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // STATUS CARD (Centered)
+                // STATUS CARD
                 Card(
                     colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
                     shape = RoundedCornerShape(20.dp),
@@ -145,7 +140,6 @@ fun ResultScreen(
                             Text("Informasi Lengkap", style = MaterialTheme.typography.titleMedium)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-
                         DetailRow("Berat Badan", "${summary.weight} kg")
                         CustomDivider()
                         DetailRow("Tinggi Badan", "${summary.height} cm")
@@ -174,7 +168,7 @@ fun ResultScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // --- TOMBOL SIMPAN HASIL ---
+                // TOMBOL SIMPAN
                 Button(
                     onClick = {
                         if (!isSaved && currentUser != null) {
@@ -184,8 +178,6 @@ fun ResultScreen(
                         onNavigateBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-
-                    // MENGGUNAKAN HELPER (Selalu Active)
                     colors = ButtonDefaults.buttonColors(
                         containerColor = getActionButtonContainerColor(isDarkMode, true),
                         contentColor = getActionButtonContentColor(true)
@@ -199,29 +191,19 @@ fun ResultScreen(
             }
         }
 
-        // Alert Dialog
+        // DIALOG BELUM DISIMPAN (MODERN ALERT)
         if (showUnsavedDialog) {
-            AlertDialog(
-                onDismissRequest = { showUnsavedDialog = false },
-                title = { Text("Belum Disimpan") },
-                text = { Text("Data hasil cek ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?") },
-                containerColor = MaterialTheme.colorScheme.surface,
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showUnsavedDialog = false
-                            resultViewModel.clearCurrentResult()
-                            onNavigateBack()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = StatusObese)
-                    ) {
-                        Text("Keluar", color = Color.White)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text("Batal", color = MaterialTheme.colorScheme.onSurface)
-                    }
+            ModernAlertDialog(
+                onDismiss = { showUnsavedDialog = false },
+                title = "Belum Disimpan",
+                description = "Data hasil cek ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?",
+                icon = Icons.Rounded.Warning,
+                mainColor = StatusObese,
+                positiveText = "Ya, Keluar",
+                onPositive = {
+                    showUnsavedDialog = false
+                    resultViewModel.clearCurrentResult()
+                    onNavigateBack()
                 }
             )
         }

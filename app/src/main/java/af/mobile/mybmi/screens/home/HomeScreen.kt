@@ -31,11 +31,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun HomeScreen(
     onNavigateToResult: (BMICheckSummary) -> Unit,
     inputViewModel: InputViewModel = viewModel(),
-    userViewModel: UserViewModel? = null,
-    resultViewModel: af.mobile.mybmi.viewmodel.ResultViewModel? = null
+    userViewModel: UserViewModel? = null
+    // resultViewModel DIHAPUS
 ) {
     val input by inputViewModel.input.collectAsState()
     val isCalculating by inputViewModel.isCalculating.collectAsState()
+    // currentUser sekarang bertipe UserProfile
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
     val showNameInput by userViewModel?.showNameInput?.collectAsState() ?: remember { mutableStateOf(false) }
 
@@ -84,6 +85,7 @@ fun HomeScreen(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
+                    // currentUser sekarang bertipe UserProfile
                     Text(
                         text = if (currentUser != null) "Halo, ${currentUser!!.name}" else "Selamat Datang",
                         style = MaterialTheme.typography.titleMedium,

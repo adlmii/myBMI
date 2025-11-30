@@ -11,11 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,8 +39,6 @@ fun HistoryDetailScreen(
     val context = LocalContext.current
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
-
-    // STATE BARU: Untuk menyembunyikan tombol saat screenshot
     var hideUIForScreenshot by remember { mutableStateOf(false) }
 
     selectedHistory?.let { summary ->
@@ -51,20 +46,17 @@ fun HistoryDetailScreen(
 
         Scaffold(
             topBar = {
-                // TopBar juga bisa disembunyikan jika mau, tapi biasanya judul perlu ada.
-                // Disini kita biarkan tetap muncul.
                 TopAppBar(
                     title = { Text("Detail Riwayat") },
                     navigationIcon = {
-                        // Sembunyikan tombol back juga agar hasil foto bersih
                         if (!hideUIForScreenshot) {
                             IconButton(onClick = onNavigateBack) {
-                                Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                                // PERBAIKAN: Menggunakan AutoMirrored.Rounded.ArrowBack
+                                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                             }
                         }
                     },
                     actions = {
-                        // Sembunyikan tombol hapus saat foto
                         if (!hideUIForScreenshot) {
                             IconButton(onClick = { showDeleteDialog = true }) {
                                 Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = StatusObese)
@@ -74,47 +66,27 @@ fun HistoryDetailScreen(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
                 )
             },
-            // TOMBOL DOWNLOAD (Diatur Visibilitasnya)
             bottomBar = {
-                // HANYA TAMPIL JIKA hideUIForScreenshot == FALSE
                 if (!hideUIForScreenshot) {
-                    Surface(
-                        shadowElevation = 16.dp,
-                        color = MaterialTheme.colorScheme.surface
-                    ) {
+                    Surface(shadowElevation = 16.dp, color = MaterialTheme.colorScheme.surface) {
                         Box(modifier = Modifier.padding(16.dp).navigationBarsPadding()) {
-
                             var isCapturing by remember { mutableStateOf(false) }
-
                             Button(
                                 onClick = {
                                     coroutineScope.launch {
-                                        isCapturing = true // Ubah teks jadi "Menyimpan..."
-
-                                        // 1. SEMBUNYIKAN TOMBOL & NAVIGASI
+                                        isCapturing = true
                                         hideUIForScreenshot = true
-
-                                        // 2. TUNGGU SEBENTAR (Agar UI sempat hilang)
                                         delay(500)
-
                                         try {
-                                            // 3. JEPRET LAYAR
                                             val bitmap = ImageUtils.captureViewToBitmap(view)
-
-                                            // 4. Simpan ke Galeri
                                             val filename = "BMI_Result_${System.currentTimeMillis()}"
                                             val success = ImageUtils.saveBitmapToGallery(context, bitmap, filename)
-
-                                            if (success) {
-                                                Toast.makeText(context, "Hasil tersimpan tanpa tombol!", Toast.LENGTH_SHORT).show()
-                                            } else {
-                                                Toast.makeText(context, "Gagal menyimpan gambar.", Toast.LENGTH_SHORT).show()
-                                            }
+                                            if (success) Toast.makeText(context, "Hasil tersimpan!", Toast.LENGTH_SHORT).show()
+                                            else Toast.makeText(context, "Gagal menyimpan.", Toast.LENGTH_SHORT).show()
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                             Toast.makeText(context, "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
                                         } finally {
-                                            // 5. KEMBALIKAN UI SEPERTI SEMULA
                                             hideUIForScreenshot = false
                                             isCapturing = false
                                         }
@@ -139,7 +111,6 @@ fun HistoryDetailScreen(
             },
             containerColor = MaterialTheme.colorScheme.background
         ) { padding ->
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -162,7 +133,6 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Indicator
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(progress = { 1f }, modifier = Modifier.size(200.dp), color = MaterialTheme.colorScheme.surfaceVariant, strokeWidth = 15.dp)
                     CircularProgressIndicator(progress = { (summary.bmi.toFloat() / 40f).coerceIn(0f, 1f) }, modifier = Modifier.size(200.dp), color = statusColor, strokeWidth = 15.dp)
@@ -213,23 +183,25 @@ fun HistoryDetailScreen(
                     }
                 }
 
-                // Beri ruang kosong ekstra di bawah agar desain tetap seimbang saat tombol hilang
                 Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }
 
+    // --- GANTI DIALOG DI SINI ---
     if (showDeleteDialog) {
-        // ... (Kode Dialog Hapus Tetap Sama) ...
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Hapus Data Ini?") },
-            text = { Text("Data yang dihapus tidak dapat dikembalikan.") },
-            containerColor = MaterialTheme.colorScheme.surface,
-            confirmButton = {
-                Button(onClick = { selectedHistory?.let { resultViewModel.deleteHistory(it.id) }; showDeleteDialog = false; onNavigateBack() }, colors = ButtonDefaults.buttonColors(containerColor = StatusObese)) { Text("Hapus", color = Color.White) }
-            },
-            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Batal") } }
+        ModernAlertDialog(
+            onDismiss = { showDeleteDialog = false },
+            title = "Hapus Data Ini?",
+            description = "Data yang sedang Anda lihat akan dihapus permanen dari penyimpanan.",
+            icon = Icons.Rounded.Delete,
+            mainColor = StatusObese,
+            positiveText = "Hapus",
+            onPositive = {
+                selectedHistory?.let { resultViewModel.deleteHistory(it.id) }
+                showDeleteDialog = false
+                onNavigateBack()
+            }
         )
     }
 }

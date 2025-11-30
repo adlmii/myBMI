@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -79,15 +80,16 @@ fun ProfileScreen(
                 Text(
                     text = currentUser?.name ?: "Pengguna",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = Color.White
                 )
 
-                // Info Tambahan
+                // Info Tambahan (UPDATED)
                 if (currentUser != null) {
                     Text(
-                        text = "${currentUser!!.gender} • Member 2024",
+                        // Menggunakan helper function yang menangani status 0L
+                        text = "${currentUser!!.gender} • ${currentUser!!.getAgeDisplayString()}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                 }
             }
@@ -112,7 +114,8 @@ fun ProfileScreen(
                     title = "Ubah Profil",
                     onClick = onNavigateToEdit
                 )
-                Divider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
+                // FIX: Mengganti Divider dengan HorizontalDivider
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
                 ProfileMenuItem(
                     icon = Icons.Rounded.Settings,
                     title = "Pengaturan",

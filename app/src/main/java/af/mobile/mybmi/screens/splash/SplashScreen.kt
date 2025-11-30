@@ -1,13 +1,11 @@
 package af.mobile.mybmi.screens.splash
 
 import af.mobile.mybmi.theme.*
-import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.HealthAndSafety
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,26 +14,29 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import af.mobile.mybmi.R
 
 @Composable
 fun SplashScreen(
-    onNavigateToHome: () -> Unit,
-    userViewModel: UserViewModel? = null
+    onNavigateToHome: () -> Unit
 ) {
     // Animasi sederhana (Scale & Fade In)
     var startAnimation by remember { mutableStateOf(false) }
+
+    // FIX: Menggunakan .value langsung dari animateFloatAsState
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 1000)
-    )
+    ).value
     val scaleAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0.5f,
         animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
-    )
+    ).value
 
     LaunchedEffect(Unit) {
         startAnimation = true
@@ -74,8 +75,8 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .scale(scaleAnim.value)
-                .alpha(alphaAnim.value)
+                .scale(scaleAnim) // Menggunakan scaleAnim yang sudah di-fix
+                .alpha(alphaAnim)  // Menggunakan alphaAnim yang sudah di-fix
         ) {
             // LOGO ICON CONTAINER
             Surface(
@@ -85,11 +86,12 @@ fun SplashScreen(
                 modifier = Modifier.size(120.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Rounded.HealthAndSafety, // Ganti PNG dengan Vector ini
-                        contentDescription = "Logo",
-                        tint = BrandPrimary, // Warna Icon mengikuti Brand
-                        modifier = Modifier.size(64.dp)
+                    // Menggunakan R.drawable.logo
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo Aplikasi myBMI",
+                        modifier = Modifier
+                            .size(90.dp)
                     )
                 }
             }
@@ -99,7 +101,7 @@ fun SplashScreen(
             // APP NAME
             Text(
                 text = "myBMI",
-                style = MaterialTheme.typography.displaySmall, // Font besar & modern
+                style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
                 letterSpacing = 2.sp
