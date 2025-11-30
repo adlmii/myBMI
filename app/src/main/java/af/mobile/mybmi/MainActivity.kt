@@ -37,12 +37,12 @@ import af.mobile.mybmi.screens.profile.ProfileScreen
 import af.mobile.mybmi.screens.result.ResultScreen
 import af.mobile.mybmi.screens.settings.SettingsScreen
 import af.mobile.mybmi.screens.splash.SplashScreen
+import af.mobile.mybmi.screens.profile.EditProfileScreen
 
 // --- IMPORTS LAINNYA ---
 import af.mobile.mybmi.database.BMIRepository
 import af.mobile.mybmi.database.MyBMIDatabase
 import af.mobile.mybmi.database.UserRepository
-import af.mobile.mybmi.screens.profile.EditProfileScreen
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.*
 
@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeViewModel: ThemeViewModel = viewModel()
 
-            // Logika Smart Dark Mode
             val systemInDarkTheme = isSystemInDarkTheme()
             LaunchedEffect(Unit) {
                 themeViewModel.initializeTheme(systemInDarkTheme)
@@ -82,34 +81,38 @@ fun MyBMIApp(
     bmiRepository: BMIRepository? = null
 ) {
     val navController = rememberNavController()
-    val inputViewModel: InputViewModel = viewModel()
 
-    // ViewModels Setup
+    // --- VIEWMODELS SETUP ---
+
+    // 1. Shared ViewModels (Digunakan di banyak layar)
+    val inputViewModel: InputViewModel = viewModel()
+    val reminderViewModel: ReminderViewModel = viewModel()
+
+    // 2. User ViewModel dengan Factory
     val userViewModelFactory = if (userRepository != null) UserViewModelFactory(userRepository) else null
     val userViewModel = if (userViewModelFactory != null) {
         viewModel<UserViewModel>(factory = userViewModelFactory)
     } else {
-        // Fallback ViewModel, harusnya tidak terpanggil karena factory tidak null
         viewModel<UserViewModel>()
     }
 
     val currentUser by userViewModel.currentUser.collectAsState()
-    // currentUser sekarang bertipe UserProfile (dari update sebelumnya), jadi ID aman digunakan.
     val userId = currentUser?.id ?: 0
 
+    // 3. Result ViewModel dengan Factory
     val resultViewModelFactory = if (bmiRepository != null) ResultViewModelFactory(bmiRepository, userId) else null
     val resultViewModel = if (resultViewModelFactory != null) {
         viewModel<ResultViewModel>(factory = resultViewModelFactory)
     } else {
-        // Fallback ViewModel
         viewModel<ResultViewModel>()
     }
 
+    // Load history saat user ID tersedia
     LaunchedEffect(userId) {
         if (userId > 0 && bmiRepository != null) resultViewModel.loadHistory(userId)
     }
 
-    // State UI
+    // --- UI STATE ---
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -142,19 +145,26 @@ fun MyBMIApp(
                     onNavigateToHome = {
                         navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } }
                     }
-                    // userViewModel = userViewModel <-- DIHAPUS, ini fix untuk Error 1
                 )
             }
+
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToResult = { summary ->
                         resultViewModel.setCurrentResult(summary)
                         navController.navigate(Screen.Result.route)
                     },
+                    // Update Navigasi: Tambahkan aksi ke Settings
+                    onNavigateToSettings = {
+                        navController.navigate(Screen.Settings.route)
+                    },
                     inputViewModel = inputViewModel,
-                    userViewModel = userViewModel
+                    userViewModel = userViewModel,
+                    // Pass shared ReminderViewModel
+                    reminderViewModel = reminderViewModel
                 )
             }
+
             composable(Screen.Result.route) {
                 ResultScreen(
                     onNavigateBack = { navController.popBackStack() },
@@ -162,6 +172,7 @@ fun MyBMIApp(
                     userViewModel = userViewModel
                 )
             }
+
             composable(Screen.History.route) {
                 HistoryScreen(
                     onNavigateToDetail = { navController.navigate(Screen.HistoryDetail.route) },
@@ -169,9 +180,14 @@ fun MyBMIApp(
                     userViewModel = userViewModel
                 )
             }
+
             composable(Screen.HistoryDetail.route) {
-                HistoryDetailScreen(onNavigateBack = { navController.popBackStack() }, resultViewModel = resultViewModel)
+                HistoryDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    resultViewModel = resultViewModel
+                )
             }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onNavigateToEdit = { navController.navigate(Screen.EditProfile.route) },
@@ -179,14 +195,21 @@ fun MyBMIApp(
                     userViewModel = userViewModel
                 )
             }
+
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onNavigateBack = { navController.popBackStack() },
                     userViewModel = userViewModel
                 )
             }
+
             composable(Screen.Settings.route) {
-                SettingsScreen(onNavigateBack = { navController.popBackStack() }, themeViewModel = themeViewModel)
+                SettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    themeViewModel = themeViewModel,
+                    // Pass shared ReminderViewModel yang sama
+                    reminderViewModel = reminderViewModel
+                )
             }
         }
     }
@@ -198,16 +221,14 @@ fun BottomNavigationBar(
     currentRoute: String?,
     isDarkMode: Boolean
 ) {
-    // Ambil warna dari Color.kt yang baru
     val containerColor = getNavBarContainerColor(isDarkMode)
-    val selectedColor = BrandPrimary // Mint Segar
-    val unselectedColor = getNavBarUnselectedColor(isDarkMode) // Slate Abu
+    val selectedColor = BrandPrimary
+    val unselectedColor = getNavBarUnselectedColor(isDarkMode)
 
     NavigationBar(
         containerColor = containerColor,
-        // Tambahkan border tipis di atas agar terpisah rapi dari konten
         modifier = Modifier.shadow(8.dp, spotColor = Color.Black.copy(alpha = 0.05f)),
-        tonalElevation = 0.dp // Flat look, modern
+        tonalElevation = 0.dp
     ) {
         val items = listOf(
             BottomNavItem.Home,
@@ -223,7 +244,7 @@ fun BottomNavigationBar(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        modifier = Modifier.size(26.dp) // Ukuran icon sedikit diperbesar
+                        modifier = Modifier.size(26.dp)
                     )
                 },
                 label = {
@@ -243,11 +264,10 @@ fun BottomNavigationBar(
                         }
                     }
                 },
-                // Custom Colors untuk NavigationBarItem
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = selectedColor,
                     selectedTextColor = selectedColor,
-                    indicatorColor = selectedColor.copy(alpha = 0.15f), // Pill background mint transparan
+                    indicatorColor = selectedColor.copy(alpha = 0.15f),
                     unselectedIconColor = unselectedColor,
                     unselectedTextColor = unselectedColor
                 )
@@ -256,7 +276,6 @@ fun BottomNavigationBar(
     }
 }
 
-// Update BottomNavItem untuk menggunakan ImageVector (Vector Icon)
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
     object Home : BottomNavItem(Screen.Home.route, Icons.Rounded.Home, "Beranda")
     object History : BottomNavItem(Screen.History.route, Icons.Rounded.History, "Riwayat")
