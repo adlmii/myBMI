@@ -1,7 +1,10 @@
 package af.mobile.mybmi.components
 
+import af.mobile.mybmi.model.Badge
+import af.mobile.mybmi.theme.BrandPrimary
 import af.mobile.mybmi.theme.StatusObese
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -118,6 +121,75 @@ fun ModernAlertDialog(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+fun AchievementDialog(
+    badge: Badge,
+    onDismiss: () -> Unit
+) {
+    ModernDialogContainer(onDismiss = onDismiss) {
+        // 1. Icon Header (Animasi atau Highlight)
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .background(BrandPrimary.copy(alpha = 0.1f), CircleShape)
+                .border(2.dp, BrandPrimary.copy(alpha = 0.5f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = badge.icon,
+                contentDescription = null,
+                tint = BrandPrimary,
+                modifier = Modifier.size(50.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 2. Teks Selamat
+        Text(
+            text = "Pencapaian Terbuka! \uD83C\uDF89", // Emotikon Confetti
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = BrandPrimary,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 3. Nama Badge
+        Text(
+            text = badge.title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 4. Deskripsi
+        Text(
+            text = badge.description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 5. Tombol
+        Button(
+            onClick = onDismiss,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
+        ) {
+            Text("Mantap!", style = MaterialTheme.typography.titleMedium, color = Color.White)
         }
     }
 }

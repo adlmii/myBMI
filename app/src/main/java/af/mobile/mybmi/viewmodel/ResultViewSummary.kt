@@ -1,7 +1,11 @@
 package af.mobile.mybmi.viewmodel
 
+import af.mobile.mybmi.database.BMIDao
 import af.mobile.mybmi.database.BMIRepository
+import af.mobile.mybmi.database.BadgeDao
 import af.mobile.mybmi.model.BMICheckSummary
+import af.mobile.mybmi.model.Badge
+import af.mobile.mybmi.util.BadgeManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +15,8 @@ import kotlinx.coroutines.launch
 
 class ResultViewModel(
     private val bmiRepository: BMIRepository? = null,
+    private val badgeDao: BadgeDao? = null,
+    private val bmiDao: BMIDao? = null,
     private val currentUserId: Int = 0
 ) : ViewModel() {
 
@@ -26,6 +32,14 @@ class ResultViewModel(
     private val _selectedHistory = MutableStateFlow<BMICheckSummary?>(null)
     val selectedHistory: StateFlow<BMICheckSummary?> = _selectedHistory.asStateFlow()
 
+    // --- STATE BARU UNTUK BADGE ---
+    private val _newlyUnlockedBadges = MutableStateFlow<List<Badge>>(emptyList())
+    val newlyUnlockedBadges: StateFlow<List<Badge>> = _newlyUnlockedBadges.asStateFlow()
+
+    fun clearNewBadges() {
+        _newlyUnlockedBadges.value = emptyList()
+    }
+
     fun setCurrentResult(summary: BMICheckSummary) {
         _currentResult.value = summary
     }
@@ -37,11 +51,23 @@ class ResultViewModel(
     fun saveToHistory(summary: BMICheckSummary, userId: Int = 0) {
         viewModelScope.launch {
             val idToUse = if (userId > 0) userId else currentUserId
+
             if (bmiRepository != null && idToUse > 0) {
+                // 1. Simpan Data BMI
                 bmiRepository.saveBMI(idToUse, summary)
+
+                // 2. CEK BADGE (LOGIKA BARU)
+                if (badgeDao != null && bmiDao != null) {
+                    val badgeManager = BadgeManager(badgeDao, bmiDao)
+                    val newBadges = badgeManager.checkNewBadges(idToUse, summary)
+
+                    if (newBadges.isNotEmpty()) {
+                        _newlyUnlockedBadges.value = newBadges
+                    }
+                }
             }
-            // Refresh list manual (optional karena flow biasanya auto-update)
-            // Tapi untuk UX instant, kita bisa add ke local list dulu
+
+            // Refresh list manual (Optimistic Update)
             val currentList = _history.value.toMutableList()
             currentList.add(0, summary)
             _history.value = currentList
@@ -66,7 +92,7 @@ class ResultViewModel(
         _selectedHistory.value = null
     }
 
-    // --- UPDATE FUNGSI HAPUS ---
+    // --- FUNGSI HAPUS ---
     fun deleteHistory(id: String) {
         viewModelScope.launch {
             // 1. Hapus dari Database (Permanen)
@@ -76,15 +102,6 @@ class ResultViewModel(
 
             // 2. Hapus dari List di Layar (Sementara/Optimistic Update)
             _history.value = _history.value.filter { it.id != id }
-        }
-    }
-
-    fun clearAllHistory() {
-        viewModelScope.launch {
-            if (bmiRepository != null && currentUserId > 0) {
-                bmiRepository.deleteBMIByUserId(currentUserId)
-            }
-            _history.value = emptyList()
         }
     }
 }

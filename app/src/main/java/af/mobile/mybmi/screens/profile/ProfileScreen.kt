@@ -1,14 +1,16 @@
 package af.mobile.mybmi.screens.profile
 
-import af.mobile.mybmi.components.GradientScreenLayout // Import Layout Baru
+import af.mobile.mybmi.screens.profile.components.BadgeGrid
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -16,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -30,16 +33,28 @@ fun ProfileScreen(
     userViewModel: UserViewModel? = null
 ) {
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
+    val userBadges by userViewModel?.userBadges?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
 
-    // MENGGUNAKAN LAYOUT GRADIENT BARU
-    GradientScreenLayout(
-        headerContent = {
-            // Isi Header (Avatar & Nama)
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Avatar Box
+    // MENGGUNAKAN COLUMN UTAMA (Split Layout)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        // --- BAGIAN 1: HEADER (FIXED / DIAM) ---
+        // Tinggi tetap 300dp, tidak ikut scroll
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(
+                    brush = Brush.verticalGradient(listOf(GradientStart, GradientEnd)),
+                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Avatar
                 Box(
                     modifier = Modifier
                         .size(110.dp)
@@ -63,12 +78,14 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Nama
                 Text(
                     text = currentUser?.name ?: "Pengguna",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White
                 )
 
+                // Info Umur
                 if (currentUser != null) {
                     Text(
                         text = "${currentUser!!.gender} • ${currentUser!!.getAgeDisplayString()}",
@@ -77,30 +94,42 @@ fun ProfileScreen(
                     )
                 }
             }
-        },
-        content = {
-            // Isi Konten di Bawah Header
-            // Kita beri Spacer agar konten mulai di bawah lengkungan header (approx 300dp)
-            Spacer(modifier = Modifier.height(300.dp))
-
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text(
-                    text = "Akun Saya",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    ProfileMenuItem(Icons.Rounded.Edit, "Ubah Profil", onNavigateToEdit)
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                    ProfileMenuItem(Icons.Rounded.Settings, "Pengaturan", onNavigateToSettings)
-                }
-            }
         }
-    )
+
+        // --- BAGIAN 2: KONTEN (SCROLLABLE) ---
+        // Menggunakan weight(1f) agar mengisi sisa layar di BAWAH header
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f) // Kunci agar scroll terpisah dan di bawah header
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
+        ) {
+            // Badge Grid
+            BadgeGrid(userBadges = userBadges)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Menu Akun
+            Text(
+                text = "Akun Saya",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                ProfileMenuItem(Icons.Rounded.Edit, "Ubah Profil", onNavigateToEdit)
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                ProfileMenuItem(Icons.Rounded.Settings, "Pengaturan", onNavigateToSettings)
+            }
+
+            // Spacer bawah agar tidak terlalu mepet
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
 }
 
 @Composable

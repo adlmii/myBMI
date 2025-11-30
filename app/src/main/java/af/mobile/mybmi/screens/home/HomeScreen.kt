@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.home
 
+import af.mobile.mybmi.components.AchievementDialog
 import af.mobile.mybmi.components.GradientScreenLayout
 import af.mobile.mybmi.components.ModernDialogContainer
 import af.mobile.mybmi.components.ModernInput
@@ -8,6 +9,7 @@ import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.InputViewModel
 import af.mobile.mybmi.viewmodel.ReminderViewModel
+import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,7 +44,8 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     inputViewModel: InputViewModel = viewModel(),
     userViewModel: UserViewModel? = null,
-    reminderViewModel: ReminderViewModel = viewModel()
+    reminderViewModel: ReminderViewModel = viewModel(),
+    resultViewModel: ResultViewModel = viewModel()
 ) {
     val input by inputViewModel.input.collectAsState()
     val isCalculating by inputViewModel.isCalculating.collectAsState()
@@ -52,6 +55,21 @@ fun HomeScreen(
     // State Pengingat
     val isReminderEnabled by reminderViewModel.isReminderEnabled.collectAsState()
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
+
+    // 2. STATE UNTUK BADGE BARU
+    val newBadges by resultViewModel.newlyUnlockedBadges.collectAsState()
+
+    // 3. TAMPILKAN DIALOG JIKA ADA BADGE BARU
+    if (newBadges.isNotEmpty()) {
+        // Tampilkan badge pertama dari list (jika dapat banyak sekaligus, satu per satu)
+        AchievementDialog(
+            badge = newBadges.first(),
+            onDismiss = {
+                // Saat ditutup, bersihkan list badge di ViewModel
+                resultViewModel.clearNewBadges()
+            }
+        )
+    }
 
     GradientScreenLayout(
         headerContent = { /* Kosong (Dekorasi saja) */ },

@@ -1,5 +1,7 @@
 package af.mobile.mybmi.viewmodel
 
+import af.mobile.mybmi.database.BadgeDao // Tambah
+import af.mobile.mybmi.database.UserBadgeEntity // Tambah
 import af.mobile.mybmi.database.UserRepository
 import af.mobile.mybmi.model.UserProfile
 import af.mobile.mybmi.model.toEntity
@@ -12,18 +14,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-class UserViewModel(private val userRepository: UserRepository? = null) : ViewModel() {
+// UPDATE KONSTRUKTOR: Tambahkan badgeDao
+class UserViewModel(
+    private val userRepository: UserRepository? = null,
+    private val badgeDao: BadgeDao? = null
+) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<UserProfile?>(null)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
 
+    // STATE BARU: List Badge yang dimiliki User
+    private val _userBadges = MutableStateFlow<List<UserBadgeEntity>>(emptyList())
+    val userBadges: StateFlow<List<UserBadgeEntity>> = _userBadges.asStateFlow()
+
     private val _showNameInput = MutableStateFlow(false)
     val showNameInput: StateFlow<Boolean> = _showNameInput.asStateFlow()
 
-    // START: Tambahkan state untuk dialog Tanggal Lahir
     private val _showDobInput = MutableStateFlow(false)
     val showDobInput: StateFlow<Boolean> = _showDobInput.asStateFlow()
-    // END: Tambahkan state untuk dialog Tanggal Lahir
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -40,30 +48,24 @@ class UserViewModel(private val userRepository: UserRepository? = null) : ViewMo
                     val userEntity = userRepository.getLatestUser()
 
                     if (userEntity != null) {
-                        // CONVERT: Entity -> Model
                         val profile = userEntity.toModel()
                         _currentUser.value = profile
 
-                        // --- LOGIKA CHAINING DIALOG ---
+                        // LOAD BADGES SAAT USER TERDETEKSI
+                        loadUserBadges(profile.id)
 
-                        // 1. Cek Nama: Jika nama kosong (asumsi hanya terisi saat disave)
+                        // ... (Logika Dialog Nama/DOB tetap sama) ...
                         if (profile.name.isBlank()) {
                             _showNameInput.value = true
-                            _showDobInput.value = false // Pastikan DOB disembunyikan
-                        }
-                        // 2. Jika Nama sudah ada, cek Tanggal Lahir
-                        // (birthDate == 0L menandakan tanggal lahir belum diisi,
-                        // memerlukan perubahan di UserEntity.kt agar default = 0L)
-                        else if (profile.birthDate == 0L) {
-                            _showNameInput.value = false // Sembunyikan Nama
-                            _showDobInput.value = true   // Tampilkan DOB
+                            _showDobInput.value = false
+                        } else if (profile.birthDate == 0L) {
+                            _showNameInput.value = false
+                            _showDobInput.value = true
                         } else {
-                            // Semua sudah diisi
                             _showNameInput.value = false
                             _showDobInput.value = false
                         }
                     } else {
-                        // Tidak ada user di database sama sekali
                         _showNameInput.value = true
                     }
                 }
@@ -73,23 +75,32 @@ class UserViewModel(private val userRepository: UserRepository? = null) : ViewMo
         }
     }
 
-    fun saveUserName(name: String) {
-        if (name.isBlank()) return
-        viewModelScope.launch {
-            if (userRepository != null) {
-                // Simpan nama (Repository akan membuat Entity jika belum ada)
-                userRepository.insertUser(name)
-                loadCurrentUser() // Reload untuk memicu pengecekan DOB
+    // FUNGSI BARU: Ambil Badge dari Database
+    private fun loadUserBadges(userId: Int) {
+        if (badgeDao != null) {
+            viewModelScope.launch {
+                badgeDao.getUserBadges(userId).collect { badges ->
+                    _userBadges.value = badges
+                }
             }
         }
     }
 
-    // START: Fungsi baru untuk menyimpan Tanggal Lahir Pengguna
+    // ... (Sisa fungsi saveUserName, saveUserBirthDate, updateUserFull BIARKAN SAMA) ...
+    // Copy paste kode lama di bawah sini
+    fun saveUserName(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            if (userRepository != null) {
+                userRepository.insertUser(name)
+                loadCurrentUser()
+            }
+        }
+    }
+
     fun saveUserBirthDate(day: Int, month: Int, year: Int) {
         if (userRepository == null) return
-
         val calendar = Calendar.getInstance()
-        // Simpan sebagai Long (Millisecond)
         calendar.set(year, month - 1, day)
         val newBirthDateMillis = calendar.timeInMillis
 
@@ -97,14 +108,8 @@ class UserViewModel(private val userRepository: UserRepository? = null) : ViewMo
             _isLoading.value = true
             try {
                 val currentProfile = _currentUser.value ?: return@launch
-
-                // Buat Model baru dengan birthDate yang diupdate
                 val updatedProfile = currentProfile.copy(birthDate = newBirthDateMillis)
-
-                // Simpan ke database
                 userRepository.updateUser(updatedProfile.toEntity())
-
-                // Update state UI
                 _currentUser.value = updatedProfile
                 _showDobInput.value = false
             } finally {
@@ -112,9 +117,7 @@ class UserViewModel(private val userRepository: UserRepository? = null) : ViewMo
             }
         }
     }
-    // END: Fungsi baru untuk menyimpan Tanggal Lahir Pengguna
 
-    // --- FUNGSI UPDATE DATA LENGKAP ---
     fun updateUserFull(user: UserProfile) {
         viewModelScope.launch {
             _isLoading.value = true
