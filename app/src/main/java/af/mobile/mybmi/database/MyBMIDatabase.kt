@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [UserEntity::class, BMIHistoryEntity::class],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class MyBMIDatabase : RoomDatabase() {
@@ -24,11 +24,12 @@ abstract class MyBMIDatabase : RoomDatabase() {
                     context.applicationContext,
                     MyBMIDatabase::class.java,
                     "mybmi_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
-

@@ -2,125 +2,51 @@ package af.mobile.mybmi.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ==============================================
-// BRAND COLORS (LIGHT THEME) 🌿
-// ==============================================
-val GreenPrimary = Color(0xFF10B981)
-val GreenLight = Color(0xFF34D399)
-val GreenBackground = Color(0xFFF0FDF4)
-val GreenSurface = Color(0xFFFFFFFF)
-val GreenAccent = Color(0xFF059669)
+// --- BRAND PALETTE (MODERN MINT & SLATE) ---
+val BrandPrimary = Color(0xFF00C9A7) // Mint Segar
+val BrandSecondary = Color(0xFF008F7A) // Teal Gelap
+val BrandTertiary = Color(0xFF4D8076)
+val BrandAccent = Color(0xFFC4FCEF)   // Mint Sangat Muda
 
-val MintLight = Color(0xFFD1FAE5)
-val MintMedium = Color(0xFFA7F3D0)
+// --- GRADIENTS COLORS ---
+val GradientStart = Color(0xFF00C9A7)
+val GradientEnd = Color(0xFF008F7A)
 
-val TextPrimary = Color(0xFF1A1A1A)
-val TextSecondary = Color(0xFF6B6B6B)
-val TextDisabled = Color(0xFFBDBDBD)
+// --- NEUTRALS (LIGHT) ---
+val LightBackground = Color(0xFFF8F9FA) // Bukan putih murni, tapi abu sangat muda (Clean look)
+val LightSurface = Color(0xFFFFFFFF)
+val LightTextPrimary = Color(0xFF1E293B) // Slate 800 (Lebih lembut dari hitam pekat)
+val LightTextSecondary = Color(0xFF64748B) // Slate 500
 
-val ColorBlue = Color(0xFF3B82F6)
-val ColorGreen = Color(0xFF10B981)
-val ColorOrange = Color(0xFFF59E0B)
-val ColorRed = Color(0xFFEF4444)
+// --- NEUTRALS (DARK) ---
+val DarkBackground = Color(0xFF0F172A) // Slate 900 (Deep Blue-Black)
+val DarkSurface = Color(0xFF1E293B)    // Slate 800
+val DarkTextPrimary = Color(0xFFF1F5F9) // Slate 100
+val DarkTextSecondary = Color(0xFF94A3B8) // Slate 400
 
-val ColorBlueLovely = Color(0xFFEFF6FF)
-val ColorGreenLovely = Color(0xFFF0FDF4)
-val ColorOrangeLovely = Color(0xFFFEF3C7)
-val ColorRedLovely = Color(0xFFFEF2F2)
+// --- STATUS COLORS (VIBRANT) ---
+val StatusUnderweight = Color(0xFF3B82F6) // Blue 500
+val StatusNormal = Color(0xFF10B981)      // Emerald 500
+val StatusOverweight = Color(0xFFF59E0B)  // Amber 500
+val StatusObese = Color(0xFFEF4444)       // Red 500
 
-val Gray50 = Color(0xFFFAFAFA)
-val Gray100 = Color(0xFFF5F5F5)
-val Gray200 = Color(0xFFEEEEEE)
-val Gray300 = Color(0xFFE0E0E0)
-val Gray400 = Color(0xFFBDBDBD)
+// --- COMPONENT HELPERS ---
+val LightInputFill = Color(0xFFF1F5F9)    // Slate 100
+val DarkInputFill = Color(0xFF334155)     // Slate 700
 
-val LightCardBackground = Gray50
-val LightNavBarBackground = GreenPrimary
+// Navigation Bar
+fun getNavBarContainerColor(isDarkMode: Boolean) = if (isDarkMode) DarkSurface else LightSurface
+fun getNavBarSelectedIconColor(isDarkMode: Boolean) = if (isDarkMode) BrandPrimary else BrandPrimary
+fun getNavBarUnselectedColor(isDarkMode: Boolean) = if (isDarkMode) DarkTextSecondary else LightTextSecondary
 
-// ==============================================
-// DARK MODE FIXED COLORS 🔧
-// ==============================================
-
-val DarkBackground = Color(0xFF121212)
-val DarkSurface = Color(0xFF3E3E3E)
-val DarkSurfaceVariant = Color(0xFF4A4A4A)
-val DarkSurfaceHighVariant = Color(0xFF555555)
-
-val DarkNavBarBackground = Color(0xFF303030)
-val DarkNavBarSurface = Color(0xFF353535)
-
-val TextPrimaryDark = Color(0xFFFFFFFF)
-val TextSecondaryDark = Color(0xFFF0F0F0)
-val TextDisabledDark = Color(0xFFAAAAAA)
-val DarkDivider = Color(0xFF555555)
-
-val DarkBlueLovely = Color(0xFF2B5C85)
-val DarkGreenLovely = Color(0xFF267359)
-val DarkOrangeLovely = Color(0xFF8F5A2E)
-val DarkRedLovely = Color(0xFF8F2E2E)
-
-val DarkCardSurface = DarkSurface
-
-// ==============================================
-// COMPONENT SPECIFIC COLORS 🧩
-// ==============================================
-
-// --- Input Fields Placeholder ---
-// FIX: Light Mode pakai Abu-abu Solid agar JELAS
-val LightInputPlaceholder = Color.Gray
-
-// FIX: Dark Mode pakai Putih
-val DarkInputPlaceholder = Color.White
-
-// --- Buttons (Disabled State) ---
-val LightButtonDisabledContainer = GreenPrimary.copy(alpha = 0.5f)
-val LightButtonDisabledContent = Color.White
-
-val DarkButtonDisabledContainer = GreenPrimary.copy(alpha = 0.2f)
-val DarkButtonDisabledContent = Color.White.copy(alpha = 0.7f)
-
-
-// ==============================================
-// NAVIGATION BAR COLORS 🧭
-// ==============================================
-val LightNavBarIndicator = Color.White
-val LightNavBarSelectedIcon = GreenPrimary
-val LightNavBarSelectedText = Color.White
-val LightNavBarUnselectedContent = Color.White.copy(alpha = 0.7f)
-
-val DarkNavBarIndicator = GreenPrimary.copy(alpha = 0.15f)
-val DarkNavBarSelectedIcon = Color.White
-val DarkNavBarSelectedText = Color.White
-val DarkNavBarUnselectedContent = Color.White.copy(alpha = 0.5f)
-
-// ==============================================
-// HELPER FUNCTIONS
-// ==============================================
-
-fun getBackgroundColor(isDarkMode: Boolean): Color = if (isDarkMode) DarkBackground else Color.White
-fun getDividerColor(isDarkMode: Boolean): Color = if (isDarkMode) DarkDivider else Gray200
-
-// Helper untuk Komponen
-fun getInputPlaceholderColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkInputPlaceholder else LightInputPlaceholder
-
-fun getButtonDisabledContainerColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkButtonDisabledContainer else LightButtonDisabledContainer
-
-fun getButtonDisabledContentColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkButtonDisabledContent else LightButtonDisabledContent
-
-fun getNavBarContainerColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkNavBarBackground else LightNavBarBackground
-
-fun getNavBarIndicatorColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkNavBarIndicator else LightNavBarIndicator
-
-fun getNavBarSelectedIconColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkNavBarSelectedIcon else LightNavBarSelectedIcon
-
-fun getNavBarSelectedTextColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkNavBarSelectedText else LightNavBarSelectedText
-
-fun getNavBarUnselectedContentColor(isDarkMode: Boolean): Color =
-    if (isDarkMode) DarkNavBarUnselectedContent else LightNavBarUnselectedContent
+// --- ACTION BUTTON HELPERS (BARU) ---
+fun getActionButtonContainerColor(isDarkMode: Boolean, isEnabled: Boolean): Color {
+    return if (isEnabled) {
+        if (isDarkMode) BrandSecondary else BrandPrimary
+    } else {
+        if (isDarkMode) BrandPrimary.copy(alpha = 0.2f) else BrandPrimary.copy(alpha = 0.5f)
+    }
+}
+fun getActionButtonContentColor(isEnabled: Boolean): Color {
+    return if (isEnabled) Color.White else Color.White.copy(alpha = 0.7f)
+}

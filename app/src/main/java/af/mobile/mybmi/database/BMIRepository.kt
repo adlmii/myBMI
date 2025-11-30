@@ -33,19 +33,10 @@ class BMIRepository(private val bmiDao: BMIDao) {
         return bmiDao.getBMIById(uniqueId)?.toDomain()
     }
 
-    suspend fun deleteBMI(summary: BMICheckSummary) {
-        val entity = BMIHistoryEntity(
-            uniqueId = summary.id,
-            userId = 0,
-            timestamp = summary.timestamp.time,
-            height = summary.height,
-            weight = summary.weight,
-            bmi = summary.bmi,
-            category = summary.category.name,
-            idealWeightMin = summary.idealWeightRange.first,
-            idealWeightMax = summary.idealWeightRange.second
-        )
-        bmiDao.deleteBMI(entity)
+    // --- UPDATE LOGIKA HAPUS ---
+    // Sekarang menerima ID String langsung agar lebih efisien
+    suspend fun deleteBMI(uniqueId: String) {
+        bmiDao.deleteBMIByUniqueId(uniqueId)
     }
 
     suspend fun deleteBMIByUserId(userId: Int) {
@@ -72,4 +63,3 @@ class BMIRepository(private val bmiDao: BMIDao) {
         )
     }
 }
-

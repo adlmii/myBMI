@@ -5,42 +5,33 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
-    primary = GreenPrimary,
-    onPrimary = Color.White,
-    secondary = GreenLight,
-    onSecondary = TextPrimary,
-    tertiary = GreenAccent,
-    background = Color.White, // Pure white background
-    onBackground = TextPrimary,
-    surface = GreenSurface,
-    onSurface = TextPrimary,
-    surfaceVariant = MintLight,
-    onSurfaceVariant = TextSecondary,
-    primaryContainer = MintMedium,
-    onPrimaryContainer = TextPrimary
+    primary = BrandPrimary,
+    onPrimary = LightSurface,
+    secondary = BrandSecondary,
+    onSecondary = LightSurface,
+    background = LightBackground,
+    onBackground = LightTextPrimary,
+    surface = LightSurface,
+    onSurface = LightTextPrimary,
+    surfaceVariant = LightInputFill,
+    onSurfaceVariant = LightTextSecondary,
+    outline = LightTextSecondary.copy(alpha = 0.5f)
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenPrimary,
-    onPrimary = TextPrimaryDark,
-    secondary = GreenLight,
-    onSecondary = TextPrimaryDark,
-    tertiary = GreenAccent,
+    primary = BrandPrimary,
+    onPrimary = DarkBackground,
+    secondary = BrandSecondary,
+    onSecondary = DarkTextPrimary,
     background = DarkBackground,
-    onBackground = TextPrimaryDark,
+    onBackground = DarkTextPrimary,
     surface = DarkSurface,
-    onSurface = TextPrimaryDark,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = TextSecondaryDark,
-    primaryContainer = DarkGreenLovely,
-    onPrimaryContainer = TextPrimaryDark,
-    outlineVariant = DarkDivider,
-    scrim = Color.Black.copy(alpha = 0.5f),
-    inverseSurface = TextPrimaryDark,
-    inverseOnSurface = DarkBackground
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkInputFill,
+    onSurfaceVariant = DarkTextSecondary,
+    outline = DarkTextSecondary.copy(alpha = 0.5f)
 )
 
 @Composable
@@ -56,5 +47,3 @@ fun myBMITheme(
         content = content
     )
 }
-
-

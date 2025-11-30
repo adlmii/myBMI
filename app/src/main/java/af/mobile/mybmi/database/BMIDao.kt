@@ -3,7 +3,6 @@ package af.mobile.mybmi.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Delete
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,8 +16,10 @@ interface BMIDao {
     @Query("SELECT * FROM bmi_history WHERE uniqueId = :uniqueId")
     suspend fun getBMIById(uniqueId: String): BMIHistoryEntity?
 
-    @Delete
-    suspend fun deleteBMI(bmi: BMIHistoryEntity)
+    // --- LOGIKA HAPUS BARU ---
+    // Menghapus berdasarkan uniqueId (UUID) yang kita miliki di Domain Model
+    @Query("DELETE FROM bmi_history WHERE uniqueId = :uniqueId")
+    suspend fun deleteBMIByUniqueId(uniqueId: String)
 
     @Query("DELETE FROM bmi_history WHERE userId = :userId")
     suspend fun deleteBMIByUserId(userId: Int)
@@ -29,4 +30,3 @@ interface BMIDao {
     @Query("SELECT COUNT(*) FROM bmi_history WHERE userId = :userId")
     suspend fun getBMICountByUser(userId: Int): Int
 }
-

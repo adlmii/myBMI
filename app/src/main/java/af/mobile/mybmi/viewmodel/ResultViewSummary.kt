@@ -36,13 +36,13 @@ class ResultViewModel(
 
     fun saveToHistory(summary: BMICheckSummary, userId: Int = 0) {
         viewModelScope.launch {
-            // Use provided userId, fallback to currentUserId if not provided
             val idToUse = if (userId > 0) userId else currentUserId
             if (bmiRepository != null && idToUse > 0) {
                 bmiRepository.saveBMI(idToUse, summary)
             }
+            // Refresh list manual (optional karena flow biasanya auto-update)
+            // Tapi untuk UX instant, kita bisa add ke local list dulu
             val currentList = _history.value.toMutableList()
-            // Add ke awal list (newest first)
             currentList.add(0, summary)
             _history.value = currentList
         }
@@ -66,12 +66,15 @@ class ResultViewModel(
         _selectedHistory.value = null
     }
 
+    // --- UPDATE FUNGSI HAPUS ---
     fun deleteHistory(id: String) {
         viewModelScope.launch {
-            val summaryToDelete = _history.value.find { it.id == id }
-            if (summaryToDelete != null && bmiRepository != null) {
-                bmiRepository.deleteBMI(summaryToDelete)
+            // 1. Hapus dari Database (Permanen)
+            if (bmiRepository != null) {
+                bmiRepository.deleteBMI(id)
             }
+
+            // 2. Hapus dari List di Layar (Sementara/Optimistic Update)
             _history.value = _history.value.filter { it.id != id }
         }
     }

@@ -1,26 +1,26 @@
-package af.mobile.mybmi.ui
+package af.mobile.mybmi
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import af.mobile.mybmi.theme.myBMITheme
-import af.mobile.mybmi.ui.history.HistoryDetailScreen
-import af.mobile.mybmi.ui.history.HistoryScreen
-import af.mobile.mybmi.ui.home.HomeScreen
-import af.mobile.mybmi.ui.profile.ProfileScreen
-import af.mobile.mybmi.ui.result.ResultScreen
-import af.mobile.mybmi.ui.settings.SettingsScreen
-import af.mobile.mybmi.viewmodel.InputViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -28,38 +28,39 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import af.mobile.mybmi.R
+
+// --- IMPORT SCREENS ---
+import af.mobile.mybmi.screens.history.HistoryDetailScreen
+import af.mobile.mybmi.screens.history.HistoryScreen
+import af.mobile.mybmi.screens.home.HomeScreen
+import af.mobile.mybmi.screens.profile.ProfileScreen
+import af.mobile.mybmi.screens.result.ResultScreen
+import af.mobile.mybmi.screens.settings.SettingsScreen
+import af.mobile.mybmi.screens.splash.SplashScreen
+
+// --- IMPORTS LAINNYA ---
 import af.mobile.mybmi.database.BMIRepository
 import af.mobile.mybmi.database.MyBMIDatabase
 import af.mobile.mybmi.database.UserRepository
-import af.mobile.mybmi.theme.getNavBarContainerColor
-import af.mobile.mybmi.theme.getNavBarIndicatorColor
-import af.mobile.mybmi.theme.getNavBarSelectedIconColor
-import af.mobile.mybmi.theme.getNavBarSelectedTextColor
-import af.mobile.mybmi.theme.getNavBarUnselectedContentColor
-import af.mobile.mybmi.ui.splash.SplashScreen
-import af.mobile.mybmi.viewmodel.ResultViewModel
-import af.mobile.mybmi.viewmodel.ResultViewModelFactory
-import af.mobile.mybmi.viewmodel.ThemeViewModel
-import af.mobile.mybmi.viewmodel.UserViewModel
-import af.mobile.mybmi.viewmodel.UserViewModelFactory
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.draw.shadow
+import af.mobile.mybmi.screens.profile.EditProfileScreen
+import af.mobile.mybmi.theme.*
+import af.mobile.mybmi.viewmodel.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val themeViewModel: ThemeViewModel = viewModel()
+
+            // Logika Smart Dark Mode
+            val systemInDarkTheme = isSystemInDarkTheme()
+            LaunchedEffect(Unit) {
+                themeViewModel.initializeTheme(systemInDarkTheme)
+            }
+
             val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
             myBMITheme(isDarkMode = isDarkMode) {
-                // Initialize Database and Repositories
                 val database = MyBMIDatabase.getDatabase(this@MainActivity)
                 val userRepository = UserRepository(database.userDao())
                 val bmiRepository = BMIRepository(database.bmiDao())
@@ -83,43 +84,30 @@ fun MyBMIApp(
     val navController = rememberNavController()
     val inputViewModel: InputViewModel = viewModel()
 
-    // Create UserViewModel with factory
-    val userViewModelFactory = if (userRepository != null) {
-        UserViewModelFactory(userRepository)
-    } else {
-        null
-    }
+    // ViewModels Setup
+    val userViewModelFactory = if (userRepository != null) UserViewModelFactory(userRepository) else null
     val userViewModel = if (userViewModelFactory != null) {
         viewModel<UserViewModel>(factory = userViewModelFactory)
     } else {
         viewModel<UserViewModel>()
     }
 
-    // Get current user and userId
     val currentUser by userViewModel.currentUser.collectAsState()
-    val userId = currentUser?.id ?: 0  // This will be re-evaluated when currentUser changes
+    val userId = currentUser?.id ?: 0
 
-    // Create ResultViewModel with factory to provide BMIRepository
-    val resultViewModelFactory = if (bmiRepository != null) {
-        ResultViewModelFactory(bmiRepository, userId)
-    } else {
-        null
-    }
+    val resultViewModelFactory = if (bmiRepository != null) ResultViewModelFactory(bmiRepository, userId) else null
     val resultViewModel = if (resultViewModelFactory != null) {
         viewModel<ResultViewModel>(factory = resultViewModelFactory)
     } else {
         viewModel<ResultViewModel>()
     }
 
-    // Reload history whenever userId changes
     LaunchedEffect(userId) {
-        if (userId > 0 && bmiRepository != null) {
-            resultViewModel.loadHistory(userId)
-        }
+        if (userId > 0 && bmiRepository != null) resultViewModel.loadHistory(userId)
     }
 
+    // State UI
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -138,7 +126,8 @@ fun MyBMIApp(
                     isDarkMode = isDarkMode
                 )
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         NavHost(
             navController = navController,
@@ -183,7 +172,14 @@ fun MyBMIApp(
             }
             composable(Screen.Profile.route) {
                 ProfileScreen(
+                    onNavigateToEdit = { navController.navigate(Screen.EditProfile.route) }, // <--- Connect
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    userViewModel = userViewModel
+                )
+            }
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onNavigateBack = { navController.popBackStack() },
                     userViewModel = userViewModel
                 )
             }
@@ -198,26 +194,18 @@ fun MyBMIApp(
 fun BottomNavigationBar(
     navController: NavHostController,
     currentRoute: String?,
-    isDarkMode: Boolean = false
+    isDarkMode: Boolean
 ) {
-    // 1. AMBIL WARNA DARI THEME/COLOR.KT 🎨
+    // Ambil warna dari Color.kt yang baru
     val containerColor = getNavBarContainerColor(isDarkMode)
-    val indicatorColor = getNavBarIndicatorColor(isDarkMode)
+    val selectedColor = BrandPrimary // Mint Segar
+    val unselectedColor = getNavBarUnselectedColor(isDarkMode) // Slate Abu
 
-    // Kita pisahkan warna untuk Icon dan Text saat Selected
-    val selectedIconColor = getNavBarSelectedIconColor(isDarkMode)
-    val selectedTextColor = getNavBarSelectedTextColor(isDarkMode)
-
-    val unselectedColor = getNavBarUnselectedContentColor(isDarkMode)
-
-    // 2. LAYOUT NAVBAR
     NavigationBar(
         containerColor = containerColor,
-        modifier = Modifier.shadow(
-            elevation = 16.dp,
-            spotColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.1f)
-        ),
-        tonalElevation = 0.dp
+        // Tambahkan border tipis di atas agar terpisah rapi dari konten
+        modifier = Modifier.shadow(8.dp, spotColor = Color.Black.copy(alpha = 0.05f)),
+        tonalElevation = 0.dp // Flat look, modern
     ) {
         val items = listOf(
             BottomNavItem.Home,
@@ -229,27 +217,18 @@ fun BottomNavigationBar(
             val isSelected = currentRoute == item.route
 
             NavigationBarItem(
-                // Konfigurasi Icon
                 icon = {
-                    Image(
-                        painter = painterResource(id = item.iconRes),
+                    Icon(
+                        imageVector = item.icon,
                         contentDescription = item.label,
-                        modifier = Modifier.size(24.dp),
-                        // Warna Icon: Hijau jika selected (dalam pill), Putih pudar jika tidak
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
-                            if (isSelected) selectedIconColor else unselectedColor
-                        )
+                        modifier = Modifier.size(26.dp) // Ukuran icon sedikit diperbesar
                     )
                 },
-                // Konfigurasi Label Text
                 label = {
                     Text(
                         text = item.label,
-                        fontSize = 11.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        // Warna Text: Putih Tegas jika selected, Putih Pudar jika tidak
-                        // (Sebelumnya ini ikut warna hijau sehingga hilang)
-                        color = if (isSelected) selectedTextColor else unselectedColor
+                        fontSize = 12.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     )
                 },
                 selected = isSelected,
@@ -262,17 +241,24 @@ fun BottomNavigationBar(
                         }
                     }
                 },
-                // Override default colors agar tidak menimpa settingan manual kita
+                // Custom Colors untuk NavigationBarItem
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = indicatorColor,
-                    selectedIconColor = selectedIconColor,
-                    selectedTextColor = selectedTextColor,
+                    selectedIconColor = selectedColor,
+                    selectedTextColor = selectedColor,
+                    indicatorColor = selectedColor.copy(alpha = 0.15f), // Pill background mint transparan
                     unselectedIconColor = unselectedColor,
                     unselectedTextColor = unselectedColor
                 )
             )
         }
     }
+}
+
+// Update BottomNavItem untuk menggunakan ImageVector (Vector Icon)
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
+    object Home : BottomNavItem(Screen.Home.route, Icons.Rounded.Home, "Beranda")
+    object History : BottomNavItem(Screen.History.route, Icons.Rounded.History, "Riwayat")
+    object Profile : BottomNavItem(Screen.Profile.route, Icons.Rounded.Person, "Profil")
 }
 
 sealed class Screen(val route: String) {
@@ -282,11 +268,6 @@ sealed class Screen(val route: String) {
     object History : Screen("history")
     object HistoryDetail : Screen("history_detail")
     object Profile : Screen("profile")
+    object EditProfile : Screen("edit_profile")
     object Settings : Screen("settings")
-}
-
-sealed class BottomNavItem(val route: String, val iconRes: Int, val label: String) {
-    object Home : BottomNavItem(Screen.Home.route, R.drawable.icon1, "Beranda")
-    object History : BottomNavItem(Screen.History.route, R.drawable.icon3, "Riwayat")
-    object Profile : BottomNavItem(Screen.Profile.route, R.drawable.icon2, "Profil")
 }
