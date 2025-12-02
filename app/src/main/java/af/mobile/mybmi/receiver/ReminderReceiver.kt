@@ -43,11 +43,16 @@ class ReminderReceiver : BroadcastReceiver() {
             context, 0, openAppIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        // Teks Notifikasi Baru (Copywriting lebih menarik)
+        val titleText = "Waktunya Cek Kesehatan! 🌿"
+        val bodyText = "Konsistensi adalah kunci. Yuk luangkan 1 menit untuk update data BMI dan pantau progresmu! 💪"
+
         // 3. Bangun Notifikasi
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Pastikan icon ada, atau ganti icon lain
-            .setContentTitle("Waktunya Cek BMI! ⚖️")
-            .setContentText("Sudah sebulan nih. Yuk pantau kesehatanmu sekarang.")
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Icon aplikasi
+            .setContentTitle(titleText)
+            .setContentText(bodyText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bodyText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

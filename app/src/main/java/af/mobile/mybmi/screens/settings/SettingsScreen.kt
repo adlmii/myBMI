@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-@OptIn(ExperimentalLayoutApi::class) // Untuk FlowRow
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
@@ -50,7 +50,7 @@ fun SettingsScreen(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
-            // Jika diizinkan, aktifkan reminder. Jika ditolak, switch tetap mati (user perlu diberitahu idealnya)
+            // Jika diizinkan, aktifkan reminder. Jika ditolak, switch tetap mati
             if (isGranted) {
                 reminderViewModel.toggleReminder(true)
             }
@@ -117,7 +117,7 @@ fun SettingsScreen(
                         checked = isReminderEnabled,
                         onCheckedChange = { isChecked ->
                             if (isChecked) {
-                                // Cek Izin Notifikasi dulu
+                                // Cek Izin Notifikasi dulu (Android 13+)
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 } else {
@@ -134,7 +134,7 @@ fun SettingsScreen(
                     )
                 }
 
-                // Baris Jadwal (Hanya muncul jika aktif)
+                // Baris Jadwal & Tombol Tes (Hanya muncul jika aktif)
                 if (isReminderEnabled) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
 
@@ -149,6 +149,25 @@ fun SettingsScreen(
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
+
+                    // --- TOMBOL TES NOTIFIKASI ---
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+
+                    Box(modifier = Modifier.padding(16.dp)) {
+                        Button(
+                            onClick = { reminderViewModel.testNotificationInstant() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant, // Warna netral
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Rounded.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Tes Notifikasi Sekarang")
+                        }
+                    }
                 }
             }
 
@@ -203,11 +222,10 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Grid Angka (Menggunakan FlowRow agar responsif)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                maxItemsInEachRow = 7 // Mirip kalender (7 hari seminggu)
+                maxItemsInEachRow = 7
             ) {
                 (1..28).forEach { day ->
                     val isSelected = reminderDay == day
@@ -263,7 +281,7 @@ fun SettingsSectionTitle(title: String) {
     )
 }
 
-// Dialog Kebijakan Privasi (Refactored)
+// Dialog Kebijakan Privasi
 @Composable
 fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
     ModernDialogContainer(onDismiss = onDismiss) {

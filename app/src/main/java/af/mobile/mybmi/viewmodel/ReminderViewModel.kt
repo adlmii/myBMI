@@ -1,8 +1,10 @@
 package af.mobile.mybmi.viewmodel
 
+import af.mobile.mybmi.receiver.ReminderReceiver
 import af.mobile.mybmi.util.ReminderScheduler
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,5 +55,12 @@ class ReminderViewModel(application: Application) : AndroidViewModel(application
             ReminderScheduler.cancelReminder(getApplication())
             ReminderScheduler.scheduleMonthlyReminder(getApplication(), day)
         }
+    }
+
+    // --- FUNGSI BARU: Tes Notifikasi Langsung ---
+    fun testNotificationInstant() {
+        // Kirim broadcast langsung tanpa menunggu AlarmManager
+        val intent = Intent(getApplication(), ReminderReceiver::class.java)
+        getApplication<Application>().sendBroadcast(intent)
     }
 }

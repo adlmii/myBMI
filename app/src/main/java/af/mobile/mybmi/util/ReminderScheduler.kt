@@ -23,31 +23,39 @@ object ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Hitung waktu trigger berikutnya
-        val calendar = Calendar.getInstance().apply {
+        val now = System.currentTimeMillis()
+
+        // Setup Kalender Target
+        val targetCalendar = Calendar.getInstance().apply {
+            // Reset dulu ke waktu sekarang
+            timeInMillis = now
+
+            // Set ke tanggal & jam yang diinginkan (di bulan ini dulu)
             set(Calendar.DAY_OF_MONTH, dayOfMonth)
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
 
-        // Jika tanggal yang dipilih sudah lewat bulan ini (misal hari ini tgl 15, user pilih tgl 10),
-        // maka jadwalkan untuk bulan depan.
-        if (calendar.timeInMillis <= System.currentTimeMillis()) {
-            calendar.add(Calendar.MONTH, 1)
+        // --- LOGIKA UTAMA ---
+        if (targetCalendar.timeInMillis <= now) {
+            // Jika sudah lewat, jadwalkan untuk BULAN DEPAN
+            targetCalendar.add(Calendar.MONTH, 1)
         }
 
         // Set Alarm
         try {
+            // Menggunakan setExactAndAllowWhileIdle agar alarm tetap bunyi meski HP dalam mode Doze (tidur)
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
+                targetCalendar.timeInMillis,
                 pendingIntent
             )
-            Log.d("ReminderScheduler", "Alarm diset untuk: ${calendar.time}")
+            Log.d("ReminderScheduler", "Alarm diset untuk: ${targetCalendar.time}")
         } catch (e: SecurityException) {
             e.printStackTrace()
-            // Di Android 13+, perlu handle permission SCHEDULE_EXACT_ALARM jika crash
+            Log.e("ReminderScheduler", "Gagal set alarm: Izin tidak diberikan")
         }
     }
 
