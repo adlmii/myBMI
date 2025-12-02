@@ -27,13 +27,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPrivacy: () -> Unit,
     themeViewModel: ThemeViewModel = viewModel(),
     reminderViewModel: ReminderViewModel = viewModel()
 ) {
@@ -43,17 +43,13 @@ fun SettingsScreen(
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
 
     // State untuk Dialog
-    var showPrivacyDialog by remember { mutableStateOf(false) }
     var showDayPickerDialog by remember { mutableStateOf(false) }
 
     // Launcher Izin Notifikasi (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
-            // Jika diizinkan, aktifkan reminder. Jika ditolak, switch tetap mati
-            if (isGranted) {
-                reminderViewModel.toggleReminder(true)
-            }
+            if (isGranted) reminderViewModel.toggleReminder(true)
         }
     )
 
@@ -95,7 +91,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. SEKSI PENGINGAT (FITUR BARU)
+            // 2. SEKSI PENGINGAT
             SettingsSectionTitle("Pengingat Rutin")
 
             Card(
@@ -117,7 +113,6 @@ fun SettingsScreen(
                         checked = isReminderEnabled,
                         onCheckedChange = { isChecked ->
                             if (isChecked) {
-                                // Cek Izin Notifikasi dulu (Android 13+)
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 } else {
@@ -150,7 +145,6 @@ fun SettingsScreen(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
-                    // --- TOMBOL TES NOTIFIKASI ---
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
 
                     Box(modifier = Modifier.padding(16.dp)) {
@@ -158,7 +152,7 @@ fun SettingsScreen(
                             onClick = { reminderViewModel.testNotificationInstant() },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant, // Warna netral
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 contentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             shape = RoundedCornerShape(12.dp)
@@ -189,10 +183,12 @@ fun SettingsScreen(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
 
+                // ITEM KEBIJAKAN PRIVASI (UPDATE: Navigasi ke Halaman Baru)
                 ListItem(
-                    modifier = Modifier.clickable { showPrivacyDialog = true },
+                    modifier = Modifier.clickable { onNavigateToPrivacy() }, // <-- Panggil fungsi navigasi
                     headlineContent = { Text("Kebijakan Privasi") },
                     leadingContent = { Icon(Icons.Rounded.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Tambah panah kanan
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
             }
@@ -203,7 +199,7 @@ fun SettingsScreen(
 
     // --- DIALOGS ---
 
-    // 1. Dialog Pilih Tanggal (Grid 1-28)
+    // Dialog Pilih Tanggal
     if (showDayPickerDialog) {
         ModernDialogContainer(onDismiss = { showDayPickerDialog = false }) {
             Text(
@@ -262,11 +258,6 @@ fun SettingsScreen(
             }
         }
     }
-
-    // 2. Dialog Kebijakan Privasi
-    if (showPrivacyDialog) {
-        PrivacyPolicyDialog(onDismiss = { showPrivacyDialog = false })
-    }
 }
 
 // Helper untuk Judul Seksi
@@ -279,55 +270,4 @@ fun SettingsSectionTitle(title: String) {
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
     )
-}
-
-// Dialog Kebijakan Privasi
-@Composable
-fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
-    ModernDialogContainer(onDismiss = onDismiss) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(BrandPrimary.copy(alpha = 0.1f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Rounded.Lock, null, tint = BrandPrimary, modifier = Modifier.size(24.dp))
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text("Kebijakan Privasi", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .verticalScroll(rememberScrollState())
-        ) {
-            PrivacySection("1. Penyimpanan Lokal", "Aplikasi myBMI bekerja sepenuhnya offline. Data kesehatan tersimpan aman di HP Anda.")
-            PrivacySection("2. Penggunaan Data", "Data tinggi, berat, dan foto hanya digunakan untuk kalkulasi BMI dan personalisasi tampilan.")
-            PrivacySection("3. Izin Akses", "Akses Galeri/Kamera hanya diminta saat mengganti foto profil. Akses Notifikasi untuk fitur pengingat.")
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = onDismiss,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
-        ) {
-            Text("Saya Mengerti")
-        }
-    }
-}
-
-@Composable
-fun PrivacySection(title: String, content: String) {
-    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(content, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 20.sp)
-    }
 }

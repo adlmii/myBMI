@@ -45,6 +45,7 @@ import af.mobile.mybmi.database.MyBMIDatabase
 import af.mobile.mybmi.database.UserRepository
 import af.mobile.mybmi.database.BadgeDao // Import BadgeDao
 import af.mobile.mybmi.database.BMIDao   // Import BMIDao
+import af.mobile.mybmi.screens.settings.PrivacyPolicyScreen
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.*
 
@@ -235,8 +236,16 @@ fun MyBMIApp(
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
+                    onNavigateToPrivacy = { navController.navigate(Screen.PrivacyPolicy.route) }, // <-- Tambah ini
                     themeViewModel = themeViewModel,
-                    reminderViewModel = reminderViewModel // Shared Instance
+                    reminderViewModel = reminderViewModel
+                )
+            }
+
+            // SCREEN: PRIVACY POLICY
+            composable(Screen.PrivacyPolicy.route) {
+                PrivacyPolicyScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }
@@ -319,4 +328,5 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object EditProfile : Screen("edit_profile")
     object Settings : Screen("settings")
+    object PrivacyPolicy : Screen("privacy_policy")
 }
