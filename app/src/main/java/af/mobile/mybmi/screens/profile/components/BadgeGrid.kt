@@ -5,14 +5,13 @@ import af.mobile.mybmi.database.UserBadgeEntity
 import af.mobile.mybmi.model.Badge
 import af.mobile.mybmi.theme.BrandPrimary
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,35 +26,84 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun BadgeGrid(
-    userBadges: List<UserBadgeEntity>
+    userBadges: List<UserBadgeEntity>,
+    onSeeAllClick: () -> Unit
 ) {
     val allBadges = Badge.entries
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Pencapaian",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground, // Teks adaptif (Hitam/Putih)
-            modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
-        )
+    val sortedBadges = remember(userBadges) {
+        allBadges.sortedByDescending { badge ->
+            userBadges.any { it.badgeId == badge.id }
+        }
+    }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.heightIn(max = 300.dp)
+    val previewBadges = sortedBadges.take(6)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // Header Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp, start = 4.dp, end = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            items(allBadges) { badge ->
-                val isUnlocked = userBadges.any { it.badgeId == badge.id }
-                BadgeItem(badge = badge, isUnlocked = isUnlocked) {
-                    selectedBadge = badge
+            Text(
+                text = "Pencapaian",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Row(
+                modifier = Modifier.clickable { onSeeAllClick() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Lihat Semua",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = BrandPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = BrandPrimary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
+        val rows = previewBadges.chunked(3)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            rows.forEach { rowBadges ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowBadges.forEach { badge ->
+                        val isUnlocked = userBadges.any { it.badgeId == badge.id }
+                        Box(modifier = Modifier.weight(1f)) {
+                            BadgeItem(badge = badge, isUnlocked = isUnlocked) {
+                                selectedBadge = badge
+                            }
+                        }
+                    }
+
+                    val emptySlots = 3 - rowBadges.size
+                    repeat(emptySlots) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
     }
 
+    // Dialog Detail
     if (selectedBadge != null) {
         val isUnlocked = userBadges.any { it.badgeId == selectedBadge!!.id }
         BadgeDetailDialog(badge = selectedBadge!!, isUnlocked = isUnlocked) {
@@ -66,11 +114,10 @@ fun BadgeGrid(
 
 @Composable
 fun BadgeItem(badge: Badge, isUnlocked: Boolean, onClick: () -> Unit) {
-    // --- PALET WARNA ITEM GRID ---
     val containerColor = if (isUnlocked) {
-        BrandPrimary.copy(alpha = 0.15f) // Mint Transparan
+        BrandPrimary.copy(alpha = 0.15f)
     } else {
-        MaterialTheme.colorScheme.surfaceVariant // Abu-abu adaptif
+        MaterialTheme.colorScheme.surfaceVariant
     }
 
     val iconColor = if (isUnlocked) {

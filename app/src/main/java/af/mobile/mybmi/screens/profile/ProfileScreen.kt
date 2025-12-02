@@ -30,19 +30,22 @@ import java.io.File
 fun ProfileScreen(
     onNavigateToEdit: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToBadgeList: () -> Unit,
     userViewModel: UserViewModel? = null
 ) {
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
     val userBadges by userViewModel?.userBadges?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
 
-    // MENGGUNAKAN COLUMN UTAMA (Split Layout)
+    // --- STRUKTUR UTAMA ---
+    // Scroll dipindahkan ke SINI (Root Column) agar header ikut tergulir
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState()) // <--- Scrollable Parent
     ) {
-        // --- BAGIAN 1: HEADER (FIXED / DIAM) ---
-        // Tinggi tetap 300dp, tidak ikut scroll
+        // --- BAGIAN 1: HEADER ---
+        // Tidak perlu logic fixed/weight lagi. Cukup Box biasa.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,19 +99,18 @@ fun ProfileScreen(
             }
         }
 
-        // --- BAGIAN 2: KONTEN (SCROLLABLE) ---
-        // Menggunakan weight(1f) agar mengisi sisa layar di BAWAH header
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f) // Kunci agar scroll terpisah dan di bawah header
-                .verticalScroll(rememberScrollState())
                 .padding(24.dp)
         ) {
             // Badge Grid
-            BadgeGrid(userBadges = userBadges)
+            BadgeGrid(
+                userBadges = userBadges,
+                onSeeAllClick = onNavigateToBadgeList
+            )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Menu Akun
             Text(
@@ -126,7 +128,6 @@ fun ProfileScreen(
                 ProfileMenuItem(Icons.Rounded.Settings, "Pengaturan", onNavigateToSettings)
             }
 
-            // Spacer bawah agar tidak terlalu mepet
             Spacer(modifier = Modifier.height(24.dp))
         }
     }

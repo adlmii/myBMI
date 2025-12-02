@@ -131,7 +131,7 @@ fun AchievementDialog(
     onDismiss: () -> Unit
 ) {
     ModernDialogContainer(onDismiss = onDismiss) {
-        // 1. Icon Header (Animasi atau Highlight)
+        // 1. Icon Header
         Box(
             modifier = Modifier
                 .size(100.dp)
@@ -149,9 +149,9 @@ fun AchievementDialog(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 2. Teks Selamat
+        // 2.
         Text(
-            text = "Pencapaian Terbuka! \uD83C\uDF89", // Emotikon Confetti
+            text = "Pencapaian Terbuka!",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = BrandPrimary,

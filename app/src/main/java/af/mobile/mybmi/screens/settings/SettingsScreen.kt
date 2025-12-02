@@ -34,6 +34,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
+    onNavigateToTerms: () -> Unit,
+    onNavigateToGuide: () -> Unit,
     themeViewModel: ThemeViewModel = viewModel(),
     reminderViewModel: ReminderViewModel = viewModel()
 ) {
@@ -168,27 +170,50 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. SEKSI TENTANG APLIKASI
-            SettingsSectionTitle("Tentang Aplikasi")
+            SettingsSectionTitle("Bantuan & Info")
 
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
+                // Item: Panduan
                 ListItem(
-                    headlineContent = { Text("Versi Aplikasi") },
-                    trailingContent = { Text("1.0.0", fontWeight = FontWeight.Bold, color = BrandPrimary) },
-                    leadingContent = { Icon(Icons.Rounded.Info, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    modifier = Modifier.clickable { onNavigateToGuide() },
+                    headlineContent = { Text("Panduan Penggunaan") },
+                    leadingContent = { Icon(Icons.Rounded.Help, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
 
-                // ITEM KEBIJAKAN PRIVASI (UPDATE: Navigasi ke Halaman Baru)
+                // Item: Syarat & Ketentuan
                 ListItem(
-                    modifier = Modifier.clickable { onNavigateToPrivacy() }, // <-- Panggil fungsi navigasi
+                    modifier = Modifier.clickable { onNavigateToTerms() },
+                    headlineContent = { Text("Syarat & Ketentuan") },
+                    leadingContent = { Icon(Icons.Rounded.Description, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+
+                // Item: Kebijakan Privasi
+                ListItem(
+                    modifier = Modifier.clickable { onNavigateToPrivacy() },
                     headlineContent = { Text("Kebijakan Privasi") },
-                    leadingContent = { Icon(Icons.Rounded.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Tambah panah kanan
+                    leadingContent = { Icon(Icons.Rounded.Security, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+
+                // Item: Versi Aplikasi
+                ListItem(
+                    headlineContent = { Text("Versi Aplikasi") },
+                    trailingContent = { Text("1.0.0", fontWeight = FontWeight.Bold, color = BrandPrimary) },
+                    leadingContent = { Icon(Icons.Rounded.Info, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
             }

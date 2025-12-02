@@ -40,8 +40,7 @@ class ResultViewModel(
     private val _newlyUnlockedBadges = MutableStateFlow<List<Badge>>(emptyList())
     val newlyUnlockedBadges: StateFlow<List<Badge>> = _newlyUnlockedBadges.asStateFlow()
 
-    // --- FITUR BARU: STREAK STATE ---
-    // Otomatis update setiap kali _history berubah
+    // --- STREAK STATE ---
     val streakCount: StateFlow<Int> = _history.map { list ->
         StreakUtils.calculateMonthlyStreak(list)
     }.stateIn(
@@ -50,8 +49,11 @@ class ResultViewModel(
         initialValue = 0
     )
 
-    fun clearNewBadges() {
-        _newlyUnlockedBadges.value = emptyList()
+    fun dismissBadge() {
+        val currentList = _newlyUnlockedBadges.value
+        if (currentList.isNotEmpty()) {
+            _newlyUnlockedBadges.value = currentList.drop(1)
+        }
     }
 
     fun setCurrentResult(summary: BMICheckSummary) {

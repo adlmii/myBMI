@@ -11,7 +11,6 @@ import af.mobile.mybmi.viewmodel.InputViewModel
 import af.mobile.mybmi.viewmodel.ReminderViewModel
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -64,7 +63,7 @@ fun HomeScreen(
     if (newBadges.isNotEmpty()) {
         AchievementDialog(
             badge = newBadges.first(),
-            onDismiss = { resultViewModel.clearNewBadges() }
+            onDismiss = { resultViewModel.dismissBadge() }
         )
     }
 
@@ -106,11 +105,8 @@ fun HomeScreen(
                         )
                     }
 
-                    // --- STREAK BADGE ---
-                    // Hanya muncul jika streak > 0
-                    if (streakCount > 0) {
-                        StreakBadge(count = streakCount)
-                    }
+                    // --- STREAK BADGE  ---
+                    StreakBadge(count = streakCount)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -181,23 +177,27 @@ fun HomeScreen(
 
 @Composable
 fun StreakBadge(count: Int) {
+    val isActive = count > 0
+
+    val iconColor = if (isActive) StatusStreak else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    val textColor = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RoundedCornerShape(50),
-        shadowElevation = 4.dp,
+        shadowElevation = if (isActive) 4.dp else 0.dp,
         modifier = Modifier.wrapContentSize()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 6.dp)
-                .clickable { /* Opsional: Bisa tambah aksi klik nanti */ }
+                .clickable { /* Opsional: Bisa tambah aksi klik nanti (misal: info streak) */ }
         ) {
             Icon(
                 imageVector = Icons.Rounded.LocalFireDepartment,
                 contentDescription = "Streak",
-                tint = StatusStreak,
+                tint = iconColor,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -208,6 +208,7 @@ fun StreakBadge(count: Int) {
                 text = "$count",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = textColor
             )
         }
     }

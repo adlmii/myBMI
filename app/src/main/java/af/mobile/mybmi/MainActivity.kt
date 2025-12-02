@@ -45,7 +45,10 @@ import af.mobile.mybmi.database.MyBMIDatabase
 import af.mobile.mybmi.database.UserRepository
 import af.mobile.mybmi.database.BadgeDao // Import BadgeDao
 import af.mobile.mybmi.database.BMIDao   // Import BMIDao
+import af.mobile.mybmi.screens.profile.BadgeListScreen
+import af.mobile.mybmi.screens.settings.GuideScreen
 import af.mobile.mybmi.screens.settings.PrivacyPolicyScreen
+import af.mobile.mybmi.screens.settings.TermsScreen
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.*
 
@@ -220,6 +223,15 @@ fun MyBMIApp(
                 ProfileScreen(
                     onNavigateToEdit = { navController.navigate(Screen.EditProfile.route) },
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToBadgeList = { navController.navigate(Screen.BadgeList.route) }, // <--- Baru
+                    userViewModel = userViewModel
+                )
+            }
+
+            // SCREEN: BADGE LIST
+            composable(Screen.BadgeList.route) {
+                BadgeListScreen(
+                    onNavigateBack = { navController.popBackStack() },
                     userViewModel = userViewModel
                 )
             }
@@ -236,7 +248,9 @@ fun MyBMIApp(
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToPrivacy = { navController.navigate(Screen.PrivacyPolicy.route) }, // <-- Tambah ini
+                    onNavigateToPrivacy = { navController.navigate(Screen.PrivacyPolicy.route) },
+                    onNavigateToTerms = { navController.navigate(Screen.Terms.route) },
+                    onNavigateToGuide = { navController.navigate(Screen.Guide.route) },
                     themeViewModel = themeViewModel,
                     reminderViewModel = reminderViewModel
                 )
@@ -245,6 +259,20 @@ fun MyBMIApp(
             // SCREEN: PRIVACY POLICY
             composable(Screen.PrivacyPolicy.route) {
                 PrivacyPolicyScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // SCREEN: TERMS
+            composable(Screen.Terms.route) {
+                TermsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // SCREEN: GUIDE
+            composable(Screen.Guide.route) {
+                GuideScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -327,6 +355,9 @@ sealed class Screen(val route: String) {
     object HistoryDetail : Screen("history_detail")
     object Profile : Screen("profile")
     object EditProfile : Screen("edit_profile")
+    object BadgeList : Screen("badge_list")
     object Settings : Screen("settings")
     object PrivacyPolicy : Screen("privacy_policy")
+    object Terms : Screen("terms")
+    object Guide : Screen("guide")
 }

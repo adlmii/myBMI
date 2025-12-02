@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
-// Definisi Badge sebagai Enum (Data Statis)
 enum class Badge(
     val id: String,
     val title: String,
@@ -19,10 +18,40 @@ enum class Badge(
         icon = Icons.Rounded.DirectionsRun,
         requirement = "Cek BMI 1x"
     ),
+
+    STREAK_1(
+        id = "streak_1",
+        title = "Mulai Rutin",
+        description = "Berhasil menjaga streak kesehatan selama 1 bulan.",
+        icon = Icons.Rounded.LocalFireDepartment,
+        requirement = "Streak 1 Bulan"
+    ),
+    STREAK_3(
+        id = "streak_3",
+        title = "Makin Konsisten",
+        description = "Luar biasa! Konsisten cek kesehatan selama 3 bulan.",
+        icon = Icons.Rounded.TrendingUp,
+        requirement = "Streak 3 Bulan"
+    ),
+    STREAK_6(
+        id = "streak_6",
+        title = "Separuh Tahun",
+        description = "Setengah tahun perjalanan kesehatan tanpa putus.",
+        icon = Icons.Rounded.WorkspacePremium,
+        requirement = "Streak 6 Bulan"
+    ),
+    STREAK_12(
+        id = "streak_12",
+        title = "Master Kesehatan",
+        description = "Satu tahun penuh dedikasi untuk tubuhmu.",
+        icon = Icons.Rounded.EmojiEvents, // Ikon Piala
+        requirement = "Streak 1 Tahun"
+    ),
+
     CONSISTENCY_3(
         id = "consistency_3",
         title = "Si Rajin",
-        description = "Konsisten mengecek kesehatanmu sebanyak 3 kali.",
+        description = "Melakukan pengecekan sebanyak 3 kali (total).",
         icon = Icons.Rounded.Repeat,
         requirement = "Total 3x Cek"
     ),
@@ -48,7 +77,6 @@ enum class Badge(
         requirement = "Cek BMI di atas jam 9 malam"
     );
 
-    // Helper untuk mencari Badge berdasarkan ID string dari database
     companion object {
         fun fromId(id: String): Badge? {
             return entries.find { it.id == id }

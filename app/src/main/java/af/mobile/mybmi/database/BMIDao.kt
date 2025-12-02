@@ -13,11 +13,12 @@ interface BMIDao {
     @Query("SELECT * FROM bmi_history WHERE userId = :userId ORDER BY timestamp DESC")
     fun getBMIHistoryByUser(userId: Int): Flow<List<BMIHistoryEntity>>
 
+    @Query("SELECT * FROM bmi_history WHERE userId = :userId ORDER BY timestamp DESC")
+    suspend fun getBMIHistoryList(userId: Int): List<BMIHistoryEntity>
+
     @Query("SELECT * FROM bmi_history WHERE uniqueId = :uniqueId")
     suspend fun getBMIById(uniqueId: String): BMIHistoryEntity?
 
-    // --- LOGIKA HAPUS BARU ---
-    // Menghapus berdasarkan uniqueId (UUID) yang kita miliki di Domain Model
     @Query("DELETE FROM bmi_history WHERE uniqueId = :uniqueId")
     suspend fun deleteBMIByUniqueId(uniqueId: String)
 

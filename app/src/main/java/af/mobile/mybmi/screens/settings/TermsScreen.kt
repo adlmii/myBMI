@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun PrivacyPolicyScreen(
+fun TermsScreen(
     onNavigateBack: () -> Unit
 ) {
     StandardScreenLayout(
-        title = "Kebijakan Privasi",
+        title = "Syarat & Ketentuan",
         onBack = onNavigateBack
     ) {
         Column(
@@ -42,36 +42,36 @@ fun PrivacyPolicyScreen(
 
             // Intro Text
             Text(
-                text = "Privasi Anda adalah prioritas mutlak kami. Dokumen ini menjelaskan transparansi myBMI dalam menangani data kesehatan Anda.",
+                text = "Mohon baca Syarat dan Ketentuan ini dengan saksama sebelum menggunakan aplikasi myBMI. Penggunaan aplikasi menandakan persetujuan Anda terhadap poin-poin berikut.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 22.sp,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Sections dengan Layout Nomor yang Rapi
-            PrivacySection(
+            // Sections
+            TermsSection(
                 number = "1",
-                title = "Penyimpanan Lokal (Offline-First)",
-                content = "Aplikasi ini beroperasi sepenuhnya secara lokal. Seluruh data kesehatan (Berat, Tinggi, BMI) dan profil Anda disimpan secara terenkripsi di dalam penyimpanan internal HP Anda. Tidak ada data yang dikirim ke server cloud manapun."
+                title = "Lisensi Penggunaan",
+                content = "myBMI memberikan Anda lisensi terbatas, non-eksklusif, dan tidak dapat dipindahtangankan untuk menggunakan aplikasi ini semata-mata untuk keperluan pemantauan kesehatan pribadi (non-komersial)."
             )
 
-            PrivacySection(
+            TermsSection(
                 number = "2",
-                title = "Penggunaan Izin Akses",
-                content = "Kami hanya meminta izin yang esensial untuk fungsionalitas aplikasi:\n• Kamera & Galeri: Digunakan hanya jika Anda ingin mengubah foto profil (opsional).\n• Notifikasi: Digunakan hanya untuk menjadwalkan pengingat cek rutin di perangkat Anda."
+                title = "Penafian Medis (Disclaimer)",
+                content = "Seluruh hasil perhitungan (BMI, Berat Ideal) dan saran kesehatan hanyalah estimasi statistik. Informasi ini BUKAN diagnosis medis dan tidak dapat menggantikan saran, diagnosis, atau perawatan dari dokter profesional."
             )
 
-            PrivacySection(
+            TermsSection(
                 number = "3",
-                title = "Bebas Pelacakan (No Tracking)",
-                content = "Untuk menjamin ketenangan Anda, aplikasi ini bebas dari pelacak iklan (ad-trackers), analitik pihak ketiga, ataupun pengumpulan data perilaku pengguna secara diam-diam."
+                title = "Akurasi Input Data",
+                content = "Anda bertanggung jawab penuh atas keakuratan data (Berat, Tinggi, Umur) yang dimasukkan. Kami tidak bertanggung jawab atas ketidaksesuaian hasil analisis yang disebabkan oleh kesalahan input pengguna."
             )
 
-            PrivacySection(
+            TermsSection(
                 number = "4",
-                title = "Kendali & Penghapusan Data",
-                content = "Data Anda sepenuhnya milik Anda. Anda dapat menghapus item riwayat kapan saja melalui menu Riwayat. Menghapus aplikasi (Uninstall) juga akan secara permanen menghapus seluruh database dari perangkat."
+                title = "Hak Kekayaan Intelektual",
+                content = "Seluruh komponen aplikasi termasuk namun tidak terbatas pada logo, desain antarmuka, kode sumber, dan aset visual adalah hak milik eksklusif pengembang myBMI. Dilarang menyalin atau mendistribusikan ulang tanpa izin."
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -80,7 +80,7 @@ fun PrivacyPolicyScreen(
 }
 
 @Composable
-fun PrivacySection(number: String, title: String, content: String) {
+fun TermsSection(number: String, title: String, content: String) {
     Row(modifier = Modifier.padding(bottom = 24.dp)) {
         // Kolom Nomor
         Text(
