@@ -6,11 +6,15 @@ import af.mobile.mybmi.database.BadgeDao
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.model.Badge
 import af.mobile.mybmi.util.BadgeManager
+import af.mobile.mybmi.util.StreakUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ResultViewModel(
@@ -32,9 +36,19 @@ class ResultViewModel(
     private val _selectedHistory = MutableStateFlow<BMICheckSummary?>(null)
     val selectedHistory: StateFlow<BMICheckSummary?> = _selectedHistory.asStateFlow()
 
-    // --- STATE BARU UNTUK BADGE ---
+    // Badge State
     private val _newlyUnlockedBadges = MutableStateFlow<List<Badge>>(emptyList())
     val newlyUnlockedBadges: StateFlow<List<Badge>> = _newlyUnlockedBadges.asStateFlow()
+
+    // --- FITUR BARU: STREAK STATE ---
+    // Otomatis update setiap kali _history berubah
+    val streakCount: StateFlow<Int> = _history.map { list ->
+        StreakUtils.calculateMonthlyStreak(list)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0
+    )
 
     fun clearNewBadges() {
         _newlyUnlockedBadges.value = emptyList()
@@ -56,7 +70,7 @@ class ResultViewModel(
                 // 1. Simpan Data BMI
                 bmiRepository.saveBMI(idToUse, summary)
 
-                // 2. CEK BADGE (LOGIKA BARU)
+                // 2. CEK BADGE
                 if (badgeDao != null && bmiDao != null) {
                     val badgeManager = BadgeManager(badgeDao, bmiDao)
                     val newBadges = badgeManager.checkNewBadges(idToUse, summary)
@@ -92,15 +106,11 @@ class ResultViewModel(
         _selectedHistory.value = null
     }
 
-    // --- FUNGSI HAPUS ---
     fun deleteHistory(id: String) {
         viewModelScope.launch {
-            // 1. Hapus dari Database (Permanen)
             if (bmiRepository != null) {
                 bmiRepository.deleteBMI(id)
             }
-
-            // 2. Hapus dari List di Layar (Sementara/Optimistic Update)
             _history.value = _history.value.filter { it.id != id }
         }
     }

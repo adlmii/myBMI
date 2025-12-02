@@ -29,9 +29,10 @@ val StatusUnderweight = Color(0xFF3B82F6) // Blue 500
 val StatusNormal = Color(0xFF10B981)      // Emerald 500
 val StatusOverweight = Color(0xFFF59E0B)  // Amber 500
 val StatusObese = Color(0xFFEF4444)       // Red 500
+val StatusStreak = Color(0xFFFF9800)      // Orange 500 (Warna Api Streak)
 
 // --- COMPONENT HELPERS ---
-val LightInputFill = Color(0xFFF1F5F9)    // Slate 100
+val LightInputFill = Color(0xFFE2E8F0)    // Slate 200
 val DarkInputFill = Color(0xFF334155)     // Slate 700
 
 // Navigation Bar

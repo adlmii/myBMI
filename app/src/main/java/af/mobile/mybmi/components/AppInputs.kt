@@ -62,11 +62,11 @@ fun ModernInput(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text), // Default Text, bisa di-override jika perlu
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
@@ -86,7 +86,7 @@ fun ModernClickableInput(
     value: String,
     onClick: () -> Unit,
     suffix: String = "",
-    placeholderText: String = "" // PARAMETER BARU DITAMBAHKAN
+    placeholderText: String = ""
 ) {
     Column(modifier = Modifier.padding(bottom = 16.dp)) {
         Text(
@@ -133,9 +133,8 @@ fun ModernClickableInput(
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 disabledBorderColor = Color.Transparent,
-                // Pastikan icon tetap berwarna meski disabled
                 disabledTrailingIconColor = BrandPrimary
             ),
             textStyle = MaterialTheme.typography.titleMedium
@@ -145,7 +144,7 @@ fun ModernClickableInput(
 
 @Composable
 fun GenderChip(text: String, icon: ImageVector, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val bgColor = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val bgColor = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant
     val contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(

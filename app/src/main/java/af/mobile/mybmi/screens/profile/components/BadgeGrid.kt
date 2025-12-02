@@ -5,8 +5,6 @@ import af.mobile.mybmi.database.UserBadgeEntity
 import af.mobile.mybmi.model.Badge
 import af.mobile.mybmi.theme.BrandPrimary
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,24 +12,23 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun BadgeGrid(
     userBadges: List<UserBadgeEntity>
 ) {
-    // Ambil semua definisi Badge dari Enum
     val allBadges = Badge.entries
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
 
@@ -40,14 +37,15 @@ fun BadgeGrid(
             text = "Pencapaian",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground, // Teks adaptif (Hitam/Putih)
             modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // 3 Kolom
+            columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.heightIn(max = 300.dp) // Batasi tinggi agar scroll parent jalan
+            modifier = Modifier.heightIn(max = 300.dp)
         ) {
             items(allBadges) { badge ->
                 val isUnlocked = userBadges.any { it.badgeId == badge.id }
@@ -58,7 +56,6 @@ fun BadgeGrid(
         }
     }
 
-    // Dialog Detail Badge
     if (selectedBadge != null) {
         val isUnlocked = userBadges.any { it.badgeId == selectedBadge!!.id }
         BadgeDetailDialog(badge = selectedBadge!!, isUnlocked = isUnlocked) {
@@ -69,124 +66,195 @@ fun BadgeGrid(
 
 @Composable
 fun BadgeItem(badge: Badge, isUnlocked: Boolean, onClick: () -> Unit) {
-    // Logic Warna: Jika locked -> Abu-abu, Jika unlocked -> BrandPrimary
-    val bgColor = if (isUnlocked) BrandPrimary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val iconColor = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    // --- PALET WARNA ITEM GRID ---
+    val containerColor = if (isUnlocked) {
+        BrandPrimary.copy(alpha = 0.15f) // Mint Transparan
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant // Abu-abu adaptif
+    }
 
-    // Grayscale Filter untuk Locked (Opsional, tapi keren)
-    val colorFilter = if (!isUnlocked) {
-        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
-    } else null
+    val iconColor = if (isUnlocked) {
+        BrandPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(12.dp)
+    val textColor = if (isUnlocked) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = badge.icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(32.dp)
-            )
-            // Icon Gembok Kecil jika Locked
-            if (!isUnlocked) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(Color.Black.copy(alpha = 0.1f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Lock,
-                        contentDescription = "Locked",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = badge.icon,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(32.dp)
+                )
+
+                if (!isUnlocked) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(Color.Black.copy(alpha = 0.2f), CircleShape), // Overlay redup
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Lock,
+                            contentDescription = "Locked",
+                            tint = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = badge.title,
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = if (isUnlocked) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = badge.title,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
     }
 }
 
 @Composable
 fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) {
     ModernDialogContainer(onDismiss = onDismiss) {
+        // --- HEADER ICON ---
+        val headerBgColor = if (isUnlocked) BrandPrimary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant
+        val headerIconColor = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .background(
-                    if (isUnlocked) BrandPrimary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant,
-                    CircleShape
-                ),
+                .background(headerBgColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = badge.icon,
                 contentDescription = null,
-                tint = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = headerIconColor,
                 modifier = Modifier.size(40.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- JUDUL ---
         Text(
             text = badge.title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Status Badge
-        Text(
-            text = if (isUnlocked) "Tercapai! 🎉" else "Belum Didapat 🔒",
-            style = MaterialTheme.typography.labelLarge,
-            color = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.error
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = badge.description,
-            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Requirement Box
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-            shape = RoundedCornerShape(8.dp)
+        // --- STATUS BADGE (Icon + Text) ---
+        val statusIcon = if (isUnlocked) Icons.Rounded.CheckCircle else Icons.Rounded.Lock
+        val statusText = if (isUnlocked) "Tercapai" else "Belum Didapat"
+        val statusColor = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.error
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "Syarat: ${badge.requirement}",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(8.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Icon(
+                imageVector = statusIcon,
+                contentDescription = null,
+                tint = statusColor,
+                modifier = Modifier.size(18.dp)
             )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.labelLarge,
+                color = statusColor,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- DESKRIPSI ---
+        Text(
+            text = badge.description,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- KOTAK SYARAT ---
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            ),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Syarat",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = badge.requirement,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-            Text("Tutup")
+        // --- TOMBOL TUTUP ---
+        Button(
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BrandPrimary,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Tutup", fontWeight = FontWeight.Bold)
         }
     }
 }
