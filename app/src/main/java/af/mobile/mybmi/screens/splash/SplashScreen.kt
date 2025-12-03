@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.splash
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.theme.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
@@ -15,11 +16,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import af.mobile.mybmi.R
 
 @Composable
 fun SplashScreen(
@@ -85,12 +86,10 @@ fun SplashScreen(
                 modifier = Modifier.size(120.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    // Menggunakan R.drawable.logo
                     Image(
                         painter = painterResource(id = R.drawable.logo),
-                        contentDescription = "Logo Aplikasi myBMI",
-                        modifier = Modifier
-                            .size(90.dp)
+                        contentDescription = stringResource(R.string.app_name),
+                        modifier = Modifier.size(90.dp)
                     )
                 }
             }
@@ -99,7 +98,7 @@ fun SplashScreen(
 
             // APP NAME
             Text(
-                text = "myBMI",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
@@ -110,7 +109,7 @@ fun SplashScreen(
 
             // TAGLINE
             Text(
-                text = "Smart Health Tracker",
+                text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.9f),
                 fontWeight = FontWeight.Medium
@@ -131,7 +130,7 @@ fun SplashScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Versi 1.0.0",
+                text = stringResource(R.string.app_version_fmt, "1.0.0"),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.6f)
             )

@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.profile.components
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.ModernDialogContainer
 import af.mobile.mybmi.database.UserBadgeEntity
 import af.mobile.mybmi.model.Badge
@@ -18,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,7 +52,7 @@ fun BadgeGrid(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Pencapaian",
+                text = stringResource(R.string.badge_section_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -61,7 +63,7 @@ fun BadgeGrid(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Lihat Semua",
+                    text = stringResource(R.string.btn_see_all),
                     style = MaterialTheme.typography.labelMedium,
                     color = BrandPrimary,
                     fontWeight = FontWeight.Bold
@@ -158,7 +160,7 @@ fun BadgeItem(badge: Badge, isUnlocked: Boolean, onClick: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .matchParentSize()
-                            .background(Color.Black.copy(alpha = 0.2f), CircleShape), // Overlay redup
+                            .background(Color.Black.copy(alpha = 0.2f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -174,7 +176,7 @@ fun BadgeItem(badge: Badge, isUnlocked: Boolean, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = badge.title,
+                text = stringResource(badge.titleRes),
                 style = MaterialTheme.typography.labelSmall,
                 color = textColor,
                 textAlign = TextAlign.Center,
@@ -190,7 +192,6 @@ fun BadgeItem(badge: Badge, isUnlocked: Boolean, onClick: () -> Unit) {
 @Composable
 fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) {
     ModernDialogContainer(onDismiss = onDismiss) {
-        // --- HEADER ICON ---
         val headerBgColor = if (isUnlocked) BrandPrimary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant
         val headerIconColor = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -210,9 +211,9 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- JUDUL ---
+        // JUDUL BADGE
         Text(
-            text = badge.title,
+            text = stringResource(badge.titleRes),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -221,9 +222,9 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- STATUS BADGE (Icon + Text) ---
+        // STATUS BADGE
         val statusIcon = if (isUnlocked) Icons.Rounded.CheckCircle else Icons.Rounded.Lock
-        val statusText = if (isUnlocked) "Tercapai" else "Belum Didapat"
+        val statusText = if (isUnlocked) stringResource(R.string.badge_status_unlocked) else stringResource(R.string.badge_status_locked)
         val statusColor = if (isUnlocked) BrandPrimary else MaterialTheme.colorScheme.error
 
         Row(
@@ -248,9 +249,9 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- DESKRIPSI ---
+        // DESKRIPSI BADGE
         Text(
-            text = badge.description,
+            text = stringResource(badge.descriptionRes),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -258,7 +259,7 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- KOTAK SYARAT ---
+        // KOTAK SYARAT
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -272,7 +273,7 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Syarat",
+                    text = stringResource(R.string.badge_requirement_label),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Bold,
@@ -280,7 +281,7 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = badge.requirement,
+                    text = stringResource(badge.requirementRes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -291,7 +292,6 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- TOMBOL TUTUP ---
         Button(
             onClick = onDismiss,
             modifier = Modifier.fillMaxWidth(),
@@ -301,7 +301,7 @@ fun BadgeDetailDialog(badge: Badge, isUnlocked: Boolean, onDismiss: () -> Unit) 
                 contentColor = Color.White
             )
         ) {
-            Text("Tutup", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.btn_close), fontWeight = FontWeight.Bold)
         }
     }
 }

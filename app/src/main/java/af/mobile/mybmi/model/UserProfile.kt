@@ -10,11 +10,11 @@ data class UserProfile(
     val id: Int = 0,
     val name: String,
     val gender: String,
-    val birthDate: Long, // 0L adalah marker untuk belum di-set
+    val birthDate: Long,
     val profileImagePath: String?
 ) {
-    // Menghitung umur dalam tahun (dipakai internal)
-    private fun getAgeInYears(): Int {
+
+    fun getAgeInYears(): Int {
         if (birthDate == 0L) return 0
 
         val dob = Calendar.getInstance().apply { timeInMillis = birthDate }
@@ -27,16 +27,6 @@ data class UserProfile(
         return age
     }
 
-    // FUNGSI BARU: Logic Display untuk ProfileScreen
-    fun getAgeDisplayString(): String {
-        return if (birthDate == 0L) {
-            "Atur Tanggal Lahir" // Teks jika belum disetting
-        } else {
-            "${getAgeInYears()} Tahun"
-        }
-    }
-
-    // Fungsi helper lainnya (disederhanakan untuk keperluan ini)
     fun getFormattedBirthDate(): String {
         if (birthDate == 0L) return ""
         val localeID = Locale.forLanguageTag("id-ID")
@@ -48,8 +38,6 @@ data class UserProfile(
         return name.isNotBlank() && birthDate != 0L
     }
 }
-
-// --- Extension Functions (Mappers) ---
 
 fun UserEntity.toModel(): UserProfile {
     return UserProfile(

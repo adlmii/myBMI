@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.profile
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.util.ImageUtils
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -100,7 +102,7 @@ fun EditProfileScreen(
 
     BackHandler(enabled = hasChanges) { showUnsavedDialog = true }
 
-    // --- 1. CONFIG CROPPER ---
+    // --- 1. CONFIG CROPPER & LAUNCHERS (Kode Logika Crop & Permission Biarkan Sama) ---
     val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
             result.uriContent?.let { uri ->
@@ -127,7 +129,6 @@ fun EditProfileScreen(
         imageCropLauncher.launch(cropOptions)
     }
 
-    // --- 2. CONFIG LAUNCHERS (Camera & Gallery) ---
     val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let { launchCropper(it) }
     }
@@ -184,7 +185,7 @@ fun EditProfileScreen(
 
     // --- UI START ---
     StandardScreenLayout(
-        title = "Edit Profil",
+        title = stringResource(R.string.edit_profile_title),
         onBack = { if (hasChanges) showUnsavedDialog = true else onNavigateBack() }
     ) {
         Column(
@@ -250,32 +251,32 @@ fun EditProfileScreen(
                 Column(modifier = Modifier.padding(24.dp)) {
                     // Input Nama
                     ModernInput(
-                        label = "Nama Panggilan",
+                        label = stringResource(R.string.label_nickname),
                         value = name,
                         onValueChange = { name = it },
                         suffix = "",
-                        placeholderText = "Nama Anda"
+                        placeholderText = stringResource(R.string.placeholder_nickname)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Input Gender
                     Text(
-                        text = "Jenis Kelamin",
+                        text = stringResource(R.string.label_gender),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         GenderChip(
-                            text = "Laki-laki",
+                            text = stringResource(R.string.gender_male),
                             icon = Icons.Rounded.Male,
                             isSelected = gender == "Laki-laki",
                             onClick = { gender = "Laki-laki" },
                             modifier = Modifier.weight(1f)
                         )
                         GenderChip(
-                            text = "Perempuan",
+                            text = stringResource(R.string.gender_female),
                             icon = Icons.Rounded.Female,
                             isSelected = gender == "Perempuan",
                             onClick = { gender = "Perempuan" },
@@ -291,9 +292,9 @@ fun EditProfileScreen(
                     val dateString = if (birthDateMillis == 0L) "" else sdf.format(Date(birthDateMillis))
 
                     ModernClickableInput(
-                        label = "Tanggal Lahir",
+                        label = stringResource(R.string.label_dob),
                         value = dateString,
-                        placeholderText = "Pilih tanggal lahir Anda",
+                        placeholderText = stringResource(R.string.placeholder_dob),
                         onClick = { showDatePicker = true }
                     )
                 }
@@ -301,9 +302,10 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 3. SAVE BUTTON (Menggunakan PrimaryButton)
+            // 3. SAVE BUTTON
+            val successMsg = stringResource(R.string.toast_profile_updated)
             PrimaryButton(
-                text = "Simpan Perubahan",
+                text = stringResource(R.string.btn_save_changes),
                 onClick = {
                     if (name.isNotBlank() && currentUser != null) {
                         val updatedUser = currentUser!!.copy(
@@ -313,7 +315,7 @@ fun EditProfileScreen(
                             profileImagePath = profileImagePath
                         )
                         userViewModel.updateUserFull(updatedUser)
-                        Toast.makeText(context, "Profil Berhasil Diperbarui", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, successMsg, Toast.LENGTH_SHORT).show()
                         onNavigateBack()
                     }
                 },
@@ -330,14 +332,14 @@ fun EditProfileScreen(
     if (showImageSourceDialog) {
         ModernDialogContainer(onDismiss = { showImageSourceDialog = false }) {
             Text(
-                text = "Ubah Foto Profil",
+                text = stringResource(R.string.dialog_change_photo_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Pilih foto baru dari galeri atau ambil langsung dengan kamera.",
+                text = stringResource(R.string.dialog_change_photo_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -347,8 +349,8 @@ fun EditProfileScreen(
 
             ImageSourceOption(
                 icon = Icons.Rounded.CameraAlt,
-                title = "Ambil Foto",
-                subtitle = "Gunakan kamera",
+                title = stringResource(R.string.option_camera),
+                subtitle = stringResource(R.string.option_camera_desc),
                 onClick = {
                     showImageSourceDialog = false
                     onCameraClick()
@@ -359,8 +361,8 @@ fun EditProfileScreen(
 
             ImageSourceOption(
                 icon = Icons.Rounded.PhotoLibrary,
-                title = "Pilih dari Galeri",
-                subtitle = "Cari di penyimpanan",
+                title = stringResource(R.string.option_gallery),
+                subtitle = stringResource(R.string.option_gallery_desc),
                 onClick = {
                     showImageSourceDialog = false
                     onGalleryClick()
@@ -374,7 +376,7 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Batal",
+                    stringResource(R.string.btn_cancel),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -386,11 +388,11 @@ fun EditProfileScreen(
     if (showUnsavedDialog) {
         ModernAlertDialog(
             onDismiss = { showUnsavedDialog = false },
-            title = "Batalkan Perubahan?",
-            description = "Anda memiliki perubahan yang belum disimpan. Yakin ingin kembali?",
+            title = stringResource(R.string.dialog_unsaved_changes_title),
+            description = stringResource(R.string.dialog_unsaved_changes_desc),
             icon = Icons.Rounded.EditOff,
             mainColor = StatusObese,
-            positiveText = "Ya, Keluar",
+            positiveText = stringResource(R.string.btn_exit),
             onPositive = {
                 showUnsavedDialog = false
                 onNavigateBack()
@@ -406,11 +408,11 @@ fun EditProfileScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { birthDateMillis = it }
                     showDatePicker = false
-                }) { Text("Pilih", color = BrandPrimary) }
+                }) { Text(stringResource(R.string.btn_select), color = BrandPrimary) }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Batal", color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         ) { DatePicker(state = datePickerState) }

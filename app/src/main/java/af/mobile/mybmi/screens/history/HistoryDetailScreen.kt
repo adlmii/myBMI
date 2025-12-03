@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.history
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.util.ImageUtils
@@ -18,8 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
@@ -37,19 +37,13 @@ fun HistoryDetailScreen(
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
 
-    // State untuk menyembunyikan UI saat screenshot
     var hideUIForScreenshot by remember { mutableStateOf(false) }
     var isCapturing by remember { mutableStateOf(false) }
 
     selectedHistory?.let { summary ->
-        val statusColor = getStatusColor(summary.category)
-
         StandardScreenLayout(
-            title = "Detail Riwayat",
-            // Sembunyikan tombol back saat screenshot (pass null)
+            title = stringResource(R.string.history_detail_title),
             onBack = if (!hideUIForScreenshot) onNavigateBack else null,
-
-            // Sembunyikan tombol delete saat screenshot
             actions = {
                 if (!hideUIForScreenshot) {
                     IconButton(onClick = { showDeleteDialog = true }) {
@@ -57,8 +51,6 @@ fun HistoryDetailScreen(
                     }
                 }
             },
-
-            // Sembunyikan tombol download saat screenshot
             bottomBar = {
                 if (!hideUIForScreenshot) {
                     Surface(
@@ -72,27 +64,19 @@ fun HistoryDetailScreen(
                                 .navigationBarsPadding()
                         ) {
                             PrimaryButton(
-                                text = if (isCapturing) "Memproses..." else "Download Hasil",
+                                text = if (isCapturing) stringResource(R.string.btn_downloading) else stringResource(R.string.btn_download_result),
                                 onClick = {
                                     coroutineScope.launch {
                                         isCapturing = true
                                         hideUIForScreenshot = true
                                         delay(500)
-
                                         try {
                                             val bitmap = ImageUtils.captureViewToBitmap(view)
                                             val filename = "BMI_Result_${System.currentTimeMillis()}"
-
-                                            // PANGGIL FUNGSI BARU (Akan throw error jika gagal)
                                             val message = ImageUtils.saveBitmapToGallery(context, bitmap, filename)
-
-                                            // Jika sampai sini, berarti sukses
                                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-
                                         } catch (e: Exception) {
-                                            // TANGKAP ERROR DI SINI
                                             e.printStackTrace()
-                                            // Tampilkan pesan error spesifik ke user
                                             Toast.makeText(context, "Gagal: ${e.message}", Toast.LENGTH_LONG).show()
                                         } finally {
                                             hideUIForScreenshot = false
@@ -108,14 +92,13 @@ fun HistoryDetailScreen(
                 }
             }
         ) {
-            // --- KONTEN UTAMA (SCROLLABLE) ---
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header Tanggal (Badge Style)
+                // Header Tanggal
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -141,66 +124,20 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Indikator BMI Besar
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(
-                        progress = { 1f },
-                        modifier = Modifier.size(200.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        strokeWidth = 15.dp
-                    )
-                    CircularProgressIndicator(
-                        progress = { (summary.bmi.toFloat() / 40f).coerceIn(0f, 1f) },
-                        modifier = Modifier.size(200.dp),
-                        color = statusColor,
-                        strokeWidth = 15.dp
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = summary.bmi.toString(),
-                            style = MaterialTheme.typography.displayMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "BMI",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                        )
-                    }
-                }
+                // REUSABLE INDICATOR
+                BigBMIIndicator(
+                    bmiValue = summary.bmi,
+                    category = summary.category
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Status Card
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp).fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = summary.category.displayName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = statusColor,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = summary.category.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                // REUSABLE STATUS
+                BMIStatusCard(category = summary.category)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Details Card (Konsisten dengan ResultScreen)
+                // REUSABLE DETAILS
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -210,16 +147,16 @@ fun HistoryDetailScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Rounded.Info, null, tint = BrandPrimary)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("Informasi Lengkap", style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.result_info_section), style = MaterialTheme.typography.titleMedium)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        DetailRow("Berat Badan", "${summary.weight} kg")
+                        DetailRow(stringResource(R.string.label_weight), "${summary.weight} kg")
                         CustomDivider()
-                        DetailRow("Tinggi Badan", "${summary.height} cm")
+                        DetailRow(stringResource(R.string.label_height), "${summary.height} cm")
                         CustomDivider()
                         DetailRow(
-                            "Berat Ideal",
+                            stringResource(R.string.label_ideal_weight),
                             "${summary.idealWeightRange.first.toInt()} - ${summary.idealWeightRange.second.toInt()} kg",
                             isHighlight = true
                         )
@@ -228,36 +165,25 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Advice Card
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        Text("Catatan Medis", style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = summary.category.advice,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                // REUSABLE ADVICE
+                BMIAdviceCard(
+                    advice = summary.category.advice,
+                    title = stringResource(R.string.result_medical_notes)
+                )
 
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }
 
-    // Dialog Konfirmasi Hapus
     if (showDeleteDialog) {
         ModernAlertDialog(
             onDismiss = { showDeleteDialog = false },
-            title = "Hapus Data Ini?",
-            description = "Data yang sedang Anda lihat akan dihapus permanen dari penyimpanan.",
+            title = stringResource(R.string.dialog_delete_single_title),
+            description = stringResource(R.string.dialog_delete_single_desc),
             icon = Icons.Rounded.Delete,
             mainColor = StatusObese,
-            positiveText = "Hapus",
+            positiveText = stringResource(R.string.btn_delete),
             onPositive = {
                 selectedHistory?.let { resultViewModel.deleteHistory(it.id) }
                 showDeleteDialog = false

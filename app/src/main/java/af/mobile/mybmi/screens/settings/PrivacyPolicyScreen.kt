@@ -1,7 +1,7 @@
 package af.mobile.mybmi.screens.settings
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.StandardScreenLayout
-import af.mobile.mybmi.theme.BrandPrimary
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,7 +19,7 @@ fun PrivacyPolicyScreen(
     onNavigateBack: () -> Unit
 ) {
     StandardScreenLayout(
-        title = "Kebijakan Privasi",
+        title = stringResource(R.string.privacy_title),
         onBack = onNavigateBack
     ) {
         Column(
@@ -26,53 +27,34 @@ fun PrivacyPolicyScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Badge Tanggal Update
+            // Badge Tanggal
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "Terakhir diperbarui: 02 Des 2025",
+                    text = stringResource(R.string.last_updated_fmt, "02 Des 2025"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
 
-            // Intro Text
+            // Intro
             Text(
-                text = "Privasi Anda adalah prioritas mutlak kami. Dokumen ini menjelaskan transparansi myBMI dalam menangani data kesehatan Anda.",
+                text = stringResource(R.string.privacy_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 22.sp,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Sections dengan Layout Nomor yang Rapi
-            PrivacySection(
-                number = "1",
-                title = "Penyimpanan Lokal (Offline-First)",
-                content = "Aplikasi ini beroperasi sepenuhnya secara lokal. Seluruh data kesehatan (Berat, Tinggi, BMI) dan profil Anda disimpan secara terenkripsi di dalam penyimpanan internal HP Anda. Tidak ada data yang dikirim ke server cloud manapun."
-            )
-
-            PrivacySection(
-                number = "2",
-                title = "Penggunaan Izin Akses",
-                content = "Kami hanya meminta izin yang esensial untuk fungsionalitas aplikasi:\n• Kamera & Galeri: Digunakan hanya jika Anda ingin mengubah foto profil (opsional).\n• Notifikasi: Digunakan hanya untuk menjadwalkan pengingat cek rutin di perangkat Anda."
-            )
-
-            PrivacySection(
-                number = "3",
-                title = "Bebas Pelacakan (No Tracking)",
-                content = "Untuk menjamin ketenangan Anda, aplikasi ini bebas dari pelacak iklan (ad-trackers), analitik pihak ketiga, ataupun pengumpulan data perilaku pengguna secara diam-diam."
-            )
-
-            PrivacySection(
-                number = "4",
-                title = "Kendali & Penghapusan Data",
-                content = "Data Anda sepenuhnya milik Anda. Anda dapat menghapus item riwayat kapan saja melalui menu Riwayat. Menghapus aplikasi (Uninstall) juga akan secara permanen menghapus seluruh database dari perangkat."
-            )
+            // Sections
+            PrivacySectionItem(stringResource(R.string.privacy_sec_1_title), stringResource(R.string.privacy_sec_1_desc))
+            PrivacySectionItem(stringResource(R.string.privacy_sec_2_title), stringResource(R.string.privacy_sec_2_desc))
+            PrivacySectionItem(stringResource(R.string.privacy_sec_3_title), stringResource(R.string.privacy_sec_3_desc))
+            PrivacySectionItem(stringResource(R.string.privacy_sec_4_title), stringResource(R.string.privacy_sec_4_desc))
 
             Spacer(modifier = Modifier.height(40.dp))
         }
@@ -80,32 +62,22 @@ fun PrivacyPolicyScreen(
 }
 
 @Composable
-fun PrivacySection(number: String, title: String, content: String) {
-    Row(modifier = Modifier.padding(bottom = 24.dp)) {
-        // Kolom Nomor
+fun PrivacySectionItem(title: String, content: String) {
+    Column(modifier = Modifier.padding(bottom = 24.dp)) {
         Text(
-            text = "$number.",
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = BrandPrimary,
-            modifier = Modifier.width(28.dp)
+            color = MaterialTheme.colorScheme.onSurface
         )
-
-        // Kolom Konten
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 22.sp
-            )
-        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = content,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 22.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
     }
 }

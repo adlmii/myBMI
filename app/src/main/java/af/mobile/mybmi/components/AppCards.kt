@@ -1,5 +1,6 @@
 package af.mobile.mybmi.components
 
+import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.theme.BrandPrimary
 import af.mobile.mybmi.theme.StatusObese
@@ -10,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -69,7 +70,7 @@ fun ModernHistoryCard(
                     text = summary.getDateFormatted(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold // Warning 1 Fixed: Removed redundant qualifier
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "${summary.weight} kg • BMI ${summary.bmi}",
@@ -80,20 +81,19 @@ fun ModernHistoryCard(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // 3. Delete Button (Lingkaran Merah)
-            // Menggunakan IconButton dengan background custom
+            // 3. Delete Button
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(StatusObese.copy(alpha = 0.1f)) // Merah transparan
+                    .background(StatusObese.copy(alpha = 0.1f))
                     .clickable(onClick = onDelete),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Delete,
                     contentDescription = "Hapus",
-                    tint = StatusObese, // Icon Merah
+                    tint = StatusObese,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -102,61 +102,61 @@ fun ModernHistoryCard(
 }
 
 @Composable
-fun EmptyStateCard() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(32.dp)
+fun BMIStatusCard(
+    category: BMICategory
+) {
+    val statusColor = getStatusColor(category)
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(120.dp)
-                .background(BrandPrimary.copy(alpha = 0.1f), CircleShape),
-            contentAlignment = Alignment.Center
+                .padding(20.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Rounded.History,
-                contentDescription = null,
-                tint = BrandPrimary,
-                modifier = Modifier.size(64.dp)
+            Text(
+                text = category.displayName,
+                style = MaterialTheme.typography.headlineSmall,
+                color = statusColor,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = category.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Belum Ada Data",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Mulai hidup sehatmu hari ini dengan melakukan pengecekan BMI pertama.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
     }
 }
 
 @Composable
-fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+fun BMIAdviceCard(
+    advice: String,
+    title: String
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = advice,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
-    // Warning 2 Fixed: Replaced Divider with HorizontalDivider
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }

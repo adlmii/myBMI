@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.profile
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.StandardScreenLayout
 import af.mobile.mybmi.model.Badge
 import af.mobile.mybmi.screens.profile.components.BadgeDetailDialog
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -32,7 +34,7 @@ fun BadgeListScreen(
     }
 
     StandardScreenLayout(
-        title = "Koleksi Pencapaian",
+        title = stringResource(R.string.badge_screen_title),
         onBack = onNavigateBack
     ) {
         // Grid Full (Scrollable)
@@ -44,7 +46,6 @@ fun BadgeListScreen(
                 .fillMaxSize()
                 .padding(vertical = 16.dp)
         ) {
-            // Gunakan sortedBadges
             items(sortedBadges) { badge ->
                 val isUnlocked = userBadges.any { it.badgeId == badge.id }
                 BadgeItem(badge = badge, isUnlocked = isUnlocked) {

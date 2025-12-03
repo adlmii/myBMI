@@ -1,80 +1,81 @@
 package af.mobile.mybmi.model
 
+import af.mobile.mybmi.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Badge(
     val id: String,
-    val title: String,
-    val description: String,
+    val titleRes: Int,
+    val descriptionRes: Int,
     val icon: ImageVector,
-    val requirement: String
+    val requirementRes: Int
 ) {
     FIRST_STEP(
         id = "first_step",
-        title = "Langkah Awal",
-        description = "Melakukan pengecekan BMI untuk pertama kalinya.",
+        titleRes = R.string.badge_first_step_title,
+        descriptionRes = R.string.badge_first_step_desc,
         icon = Icons.Rounded.DirectionsRun,
-        requirement = "Cek BMI 1x"
+        requirementRes = R.string.badge_first_step_req
     ),
 
     STREAK_1(
         id = "streak_1",
-        title = "Mulai Rutin",
-        description = "Berhasil menjaga streak kesehatan selama 1 bulan.",
+        titleRes = R.string.badge_streak_1_title,
+        descriptionRes = R.string.badge_streak_1_desc,
         icon = Icons.Rounded.LocalFireDepartment,
-        requirement = "Streak 1 Bulan"
+        requirementRes = R.string.badge_streak_1_req
     ),
     STREAK_3(
         id = "streak_3",
-        title = "Makin Konsisten",
-        description = "Luar biasa! Konsisten cek kesehatan selama 3 bulan.",
+        titleRes = R.string.badge_streak_3_title,
+        descriptionRes = R.string.badge_streak_3_desc,
         icon = Icons.Rounded.TrendingUp,
-        requirement = "Streak 3 Bulan"
+        requirementRes = R.string.badge_streak_3_req
     ),
     STREAK_6(
         id = "streak_6",
-        title = "Separuh Tahun",
-        description = "Setengah tahun perjalanan kesehatan tanpa putus.",
+        titleRes = R.string.badge_streak_6_title,
+        descriptionRes = R.string.badge_streak_6_desc,
         icon = Icons.Rounded.WorkspacePremium,
-        requirement = "Streak 6 Bulan"
+        requirementRes = R.string.badge_streak_6_req
     ),
     STREAK_12(
         id = "streak_12",
-        title = "Master Kesehatan",
-        description = "Satu tahun penuh dedikasi untuk tubuhmu.",
-        icon = Icons.Rounded.EmojiEvents, // Ikon Piala
-        requirement = "Streak 1 Tahun"
+        titleRes = R.string.badge_streak_12_title,
+        descriptionRes = R.string.badge_streak_12_desc,
+        icon = Icons.Rounded.EmojiEvents,
+        requirementRes = R.string.badge_streak_12_req
     ),
 
     CONSISTENCY_3(
         id = "consistency_3",
-        title = "Si Rajin",
-        description = "Melakukan pengecekan sebanyak 3 kali (total).",
+        titleRes = R.string.badge_consistency_3_title,
+        descriptionRes = R.string.badge_consistency_3_desc,
         icon = Icons.Rounded.Repeat,
-        requirement = "Total 3x Cek"
+        requirementRes = R.string.badge_consistency_3_req
     ),
     IDEAL_GOAL(
         id = "ideal_goal",
-        title = "Tubuh Ideal",
-        description = "Mencapai kategori Berat Badan Normal.",
+        titleRes = R.string.badge_ideal_goal_title,
+        descriptionRes = R.string.badge_ideal_goal_desc,
         icon = Icons.Rounded.Star,
-        requirement = "Hasil BMI Normal"
+        requirementRes = R.string.badge_ideal_goal_req
     ),
     PROFILE_MASTER(
         id = "profile_master",
-        title = "Profil Lengkap",
-        description = "Melengkapi foto profil dan data diri.",
+        titleRes = R.string.badge_profile_master_title,
+        descriptionRes = R.string.badge_profile_master_desc,
         icon = Icons.Rounded.AccountCircle,
-        requirement = "Set Foto Profil"
+        requirementRes = R.string.badge_profile_master_req
     ),
     NIGHT_OWL(
         id = "night_owl",
-        title = "Night Owl",
-        description = "Mengecek kesehatan di malam hari.",
+        titleRes = R.string.badge_night_owl_title,
+        descriptionRes = R.string.badge_night_owl_desc,
         icon = Icons.Rounded.DarkMode,
-        requirement = "Cek BMI di atas jam 9 malam"
+        requirementRes = R.string.badge_night_owl_req
     );
 
     companion object {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +50,6 @@ import af.mobile.mybmi.screens.settings.PrivacyPolicyScreen
 import af.mobile.mybmi.screens.settings.TermsScreen
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.*
-import androidx.compose.material.icons.rounded.BarChart
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -287,13 +288,13 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label,
+                        contentDescription = stringResource(item.labelRes),
                         modifier = Modifier.size(26.dp)
                     )
                 },
                 label = {
                     Text(
-                        text = item.label,
+                        text = stringResource(item.labelRes),
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     )
@@ -320,10 +321,11 @@ fun BottomNavigationBar(
     }
 }
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-    object Home : BottomNavItem(Screen.Home.route, Icons.Rounded.Home, "Beranda")
-    object History : BottomNavItem(Screen.History.route, Icons.Rounded.BarChart, "Analisis")
-    object Profile : BottomNavItem(Screen.Profile.route, Icons.Rounded.Person, "Profil")
+// SEALED CLASS
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val labelRes: Int) {
+    object Home : BottomNavItem(Screen.Home.route, Icons.Rounded.Home, R.string.nav_home)
+    object History : BottomNavItem(Screen.History.route, Icons.Rounded.BarChart, R.string.nav_history)
+    object Profile : BottomNavItem(Screen.Profile.route, Icons.Rounded.Person, R.string.nav_profile)
 }
 
 sealed class Screen(val route: String) {

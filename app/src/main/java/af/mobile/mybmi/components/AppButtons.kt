@@ -1,7 +1,6 @@
 package af.mobile.mybmi.components
 
 import af.mobile.mybmi.theme.BrandPrimary
-import af.mobile.mybmi.theme.StatusObese
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -22,43 +21,28 @@ fun PrimaryButton(
 ) {
     Button(
         onClick = onClick,
-        enabled = enabled && !isLoading,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = BrandPrimary,
             contentColor = Color.White,
             disabledContainerColor = BrandPrimary.copy(alpha = 0.5f)
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
+        enabled = enabled && !isLoading
     ) {
         if (isLoading) {
-            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
         } else {
-            Text(text = text, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
-    }
-}
-
-@Composable
-fun DangerButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = StatusObese.copy(alpha = 0.1f),
-            contentColor = StatusObese
-        ),
-        elevation = ButtonDefaults.buttonElevation(0.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text(text = text, style = MaterialTheme.typography.titleMedium)
     }
 }

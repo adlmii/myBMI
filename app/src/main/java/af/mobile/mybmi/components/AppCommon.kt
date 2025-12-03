@@ -1,5 +1,6 @@
 package af.mobile.mybmi.components
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.theme.*
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource // Import ini
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -59,7 +61,7 @@ fun getStatusColor(category: BMICategory): Color {
 
 @Composable
 fun EmptyStateView(
-    message: String = "Belum ada data",
+    message: String = stringResource(R.string.empty_state_title),
     icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Rounded.Info
 ) {
     Column(

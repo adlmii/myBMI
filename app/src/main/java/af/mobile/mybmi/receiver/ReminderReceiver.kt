@@ -23,14 +23,14 @@ class ReminderReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // 1. Buat Channel (Wajib untuk Android O ke atas)
+        // 1. Buat Channel
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Pengingat BMI Bulanan",
+                context.getString(R.string.notif_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Notifikasi untuk mengingatkan cek BMI rutin"
+                description = context.getString(R.string.notif_channel_desc)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -43,13 +43,12 @@ class ReminderReceiver : BroadcastReceiver() {
             context, 0, openAppIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Teks Notifikasi Baru (Copywriting lebih menarik)
-        val titleText = "Waktunya Cek Kesehatan! 🌿"
-        val bodyText = "Konsistensi adalah kunci. Yuk luangkan 1 menit untuk update data BMI dan pantau progresmu! 💪"
+        // 3. Bangun Notifikasi dengan String Resource
+        val titleText = context.getString(R.string.notif_title)
+        val bodyText = context.getString(R.string.notif_body)
 
-        // 3. Bangun Notifikasi
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Icon aplikasi
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(titleText)
             .setContentText(bodyText)
             .setStyle(NotificationCompat.BigTextStyle().bigText(bodyText))

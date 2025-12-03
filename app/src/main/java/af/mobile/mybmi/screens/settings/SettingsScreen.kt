@@ -1,5 +1,7 @@
 package af.mobile.mybmi.screens.settings
 
+import af.mobile.mybmi.R
+import af.mobile.mybmi.components.ClickableMenuItem
 import af.mobile.mybmi.components.ModernDialogContainer
 import af.mobile.mybmi.components.StandardScreenLayout
 import af.mobile.mybmi.theme.BrandPrimary
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,15 +43,11 @@ fun SettingsScreen(
     themeViewModel: ThemeViewModel = viewModel(),
     reminderViewModel: ReminderViewModel = viewModel()
 ) {
-    // State dari ViewModel
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val isReminderEnabled by reminderViewModel.isReminderEnabled.collectAsState()
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
-
-    // State untuk Dialog
     var showDayPickerDialog by remember { mutableStateOf(false) }
 
-    // Launcher Izin Notifikasi (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
@@ -56,17 +55,15 @@ fun SettingsScreen(
         }
     )
 
-    // --- MAIN UI ---
     StandardScreenLayout(
-        title = "Pengaturan",
+        title = stringResource(R.string.settings_title),
         onBack = onNavigateBack
     ) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            // 1. SEKSI TAMPILAN
-            SettingsSectionTitle("Tampilan")
-
+            // 1. TAMPILAN
+            SettingsSectionTitle(stringResource(R.string.settings_section_appearance))
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -78,8 +75,8 @@ fun SettingsScreen(
                     Icon(Icons.Rounded.DarkMode, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Mode Gelap", style = MaterialTheme.typography.titleMedium)
-                        Text("Sesuaikan kenyamanan mata", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.settings_dark_mode), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_dark_mode_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = isDarkMode,
@@ -94,14 +91,12 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. SEKSI PENGINGAT
-            SettingsSectionTitle("Pengingat Rutin")
-
+            // 2. PENGINGAT
+            SettingsSectionTitle(stringResource(R.string.settings_section_reminder))
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                // Switch On/Off
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -109,8 +104,8 @@ fun SettingsScreen(
                     Icon(Icons.Rounded.Notifications, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Ingatkan Saya", style = MaterialTheme.typography.titleMedium)
-                        Text("Notifikasi cek BMI 1x sebulan", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.settings_reminder_toggle), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_reminder_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = isReminderEnabled,
@@ -132,24 +127,24 @@ fun SettingsScreen(
                     )
                 }
 
-                // Baris Jadwal & Tombol Tes (Hanya muncul jika aktif)
                 if (isReminderEnabled) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-
                     ListItem(
                         modifier = Modifier.clickable { showDayPickerDialog = true },
-                        headlineContent = { Text("Jadwal Pengingat", style = MaterialTheme.typography.titleSmall) },
+                        headlineContent = { Text(stringResource(R.string.settings_reminder_schedule), style = MaterialTheme.typography.titleSmall) },
                         supportingContent = {
-                            Text("Setiap tanggal $reminderDay, jam 09:00 pagi", color = BrandPrimary, fontWeight = FontWeight.Medium)
+                            // "Setiap tanggal 1, jam..."
+                            Text(
+                                stringResource(R.string.settings_reminder_schedule_fmt, reminderDay),
+                                color = BrandPrimary, fontWeight = FontWeight.Medium
+                            )
                         },
                         leadingContent = {
                             Icon(Icons.Rounded.CalendarMonth, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
-
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-
                     Box(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = { reminderViewModel.testNotificationInstant() },
@@ -162,7 +157,7 @@ fun SettingsScreen(
                         ) {
                             Icon(Icons.Rounded.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Tes Notifikasi Sekarang")
+                            Text(stringResource(R.string.btn_test_notification))
                         }
                     }
                 }
@@ -170,50 +165,33 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. SEKSI TENTANG APLIKASI
-            SettingsSectionTitle("Bantuan & Info")
-
+            // 3. BANTUAN & INFO
+            SettingsSectionTitle(stringResource(R.string.settings_section_help))
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                // Item: Panduan
-                ListItem(
-                    modifier = Modifier.clickable { onNavigateToGuide() },
-                    headlineContent = { Text("Panduan Penggunaan") },
-                    // Use AutoMirrored version here
-                    leadingContent = { Icon(Icons.AutoMirrored.Rounded.Help, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                ClickableMenuItem(
+                    icon = Icons.AutoMirrored.Rounded.Help,
+                    title = stringResource(R.string.menu_guide),
+                    onClick = onNavigateToGuide,
+                    showDivider = true
+                )
+                ClickableMenuItem(
+                    icon = Icons.Rounded.Description,
+                    title = stringResource(R.string.menu_terms),
+                    onClick = onNavigateToTerms,
+                    showDivider = true
+                )
+                ClickableMenuItem(
+                    icon = Icons.Rounded.Security,
+                    title = stringResource(R.string.menu_privacy),
+                    onClick = onNavigateToPrivacy,
+                    showDivider = true
                 )
 
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-
-                // Item: Syarat & Ketentuan
                 ListItem(
-                    modifier = Modifier.clickable { onNavigateToTerms() },
-                    headlineContent = { Text("Syarat & Ketentuan") },
-                    leadingContent = { Icon(Icons.Rounded.Description, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-
-                // Item: Kebijakan Privasi
-                ListItem(
-                    modifier = Modifier.clickable { onNavigateToPrivacy() },
-                    headlineContent = { Text("Kebijakan Privasi") },
-                    leadingContent = { Icon(Icons.Rounded.Security, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-
-                // Item: Versi Aplikasi
-                ListItem(
-                    headlineContent = { Text("Versi Aplikasi") },
+                    headlineContent = { Text(stringResource(R.string.menu_version)) },
                     trailingContent = { Text("1.0.0", fontWeight = FontWeight.Bold, color = BrandPrimary) },
                     leadingContent = { Icon(Icons.Rounded.Info, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -224,27 +202,23 @@ fun SettingsScreen(
         }
     }
 
-    // --- DIALOGS ---
-
-    // Dialog Pilih Tanggal
+    // Dialog Picker
     if (showDayPickerDialog) {
         ModernDialogContainer(onDismiss = { showDayPickerDialog = false }) {
             Text(
-                text = "Pilih Tanggal",
+                text = stringResource(R.string.dialog_date_picker_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Pilih tanggal berapa setiap bulannya Anda ingin diingatkan:",
+                text = stringResource(R.string.dialog_date_picker_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -274,20 +248,17 @@ fun SettingsScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(24.dp))
-
             TextButton(
                 onClick = { showDayPickerDialog = false },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Batal", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
-// Helper untuk Judul Seksi
 @Composable
 fun SettingsSectionTitle(title: String) {
     Text(

@@ -14,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource // PENTING: Import ini
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp // Import yang benar
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import af.mobile.mybmi.R
 
 // 1. CONTAINER DASAR (Untuk dialog dengan isi custom seperti 'Ubah Foto')
 @Composable
@@ -54,7 +56,7 @@ fun ModernAlertDialog(
     mainColor: Color = StatusObese,
     positiveText: String,
     onPositive: () -> Unit,
-    negativeText: String = "Batal",
+    negativeText: String = stringResource(R.string.btn_cancel),
     onNegative: () -> Unit = onDismiss
 ) {
     ModernDialogContainer(onDismiss = onDismiss) {
@@ -89,12 +91,12 @@ fun ModernAlertDialog(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            lineHeight = 20.sp // ERROR DIPERBAIKI DI SINI
+            lineHeight = 20.sp
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Buttons (Vertical Layout lebih modern untuk HP)
+        // Buttons
         Button(
             onClick = onPositive,
             modifier = Modifier
@@ -125,6 +127,7 @@ fun ModernAlertDialog(
     }
 }
 
+// 3. ACHIEVEMENT DIALOG
 @Composable
 fun AchievementDialog(
     badge: Badge,
@@ -149,9 +152,9 @@ fun AchievementDialog(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 2.
+        // 2. Header Text
         Text(
-            text = "Pencapaian Terbuka!",
+            text = stringResource(R.string.badge_dialog_unlocked_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = BrandPrimary,
@@ -162,7 +165,7 @@ fun AchievementDialog(
 
         // 3. Nama Badge
         Text(
-            text = badge.title,
+            text = stringResource(badge.titleRes),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
@@ -172,7 +175,7 @@ fun AchievementDialog(
 
         // 4. Deskripsi
         Text(
-            text = badge.description,
+            text = stringResource(badge.descriptionRes),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -189,7 +192,7 @@ fun AchievementDialog(
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
         ) {
-            Text("Mantap!", style = MaterialTheme.typography.titleMedium, color = Color.White)
+            Text(stringResource(R.string.btn_awesome), style = MaterialTheme.typography.titleMedium, color = Color.White)
         }
     }
 }

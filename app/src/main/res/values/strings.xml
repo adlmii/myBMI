@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">myBMI</string>
 
+    <string name="nav_home">Beranda</string>
+    <string name="nav_history">Analisis</string>
+    <string name="nav_profile">Profil</string>
 
-    <!-- HOME SCREEN -->
+    <string name="app_tagline">Smart Health Tracker</string>
+    <string name="app_version_fmt">Versi %1$s</string>
+
     <string name="welcome_default">Selamat Datang</string>
-    <string name="welcome_user">Halo, %1$s</string> <string name="home_subtitle">Cek Kesehatanmu</string>
+    <string name="welcome_user">Halo, %1$s</string>
+    <string name="home_subtitle">Cek Kesehatanmu</string>
     <string name="input_card_title">Kalkulator BMI</string>
     <string name="label_height">Tinggi Badan</string>
     <string name="label_weight">Berat Badan</string>
@@ -14,25 +20,190 @@
     <string name="suffix_kg">kg</string>
     <string name="btn_calculate">Hitung Sekarang</string>
 
+    <string name="dialog_name_title">Selamat Datang!</string>
+    <string name="dialog_name_question">Siapa nama panggilanmu?</string>
+    <string name="dialog_name_placeholder">Contoh: Budi</string>
+    <string name="btn_start_now">Mulai Sekarang</string>
     <string name="reminder_title_on">Jadwal Cek Berikutnya</string>
     <string name="reminder_title_off">Pengingat Rutin Mati</string>
     <string name="reminder_subtitle_off">Ketuk untuk atur jadwal</string>
 
-    <!-- PROFILE & RESULT SCREEN -->
-    <string name="default_user_name">Pengguna</string>
-    <string name="account_section_title">Akun Saya</string>
-    <string name="menu_edit_profile">Ubah Profil</string>
-    <string name="menu_settings">Pengaturan</string>
+    <string name="history_title">Analisis Kesehatan</string>
+    <string name="history_subtitle">Pantau tren dan riwayatmu</string>
+    <string name="history_recent_section">Riwayat Terbaru</string>
+    <string name="chart_title">Tren BMI Anda</string>
+    <string name="chart_locked_title">Grafik Belum Tersedia</string>
+    <string name="chart_locked_desc">Lakukan cek rutin untuk membuka grafik.</string>
+    <string name="empty_history_title">Belum Ada Data</string>
+    <string name="empty_history_desc">Mulai cek kesehatanmu sekarang!</string>
 
     <string name="result_screen_title">Hasil Analisa</string>
+    <string name="history_detail_title">Detail Riwayat</string>
     <string name="label_bmi">BMI</string>
     <string name="result_info_section">Informasi Lengkap</string>
     <string name="label_ideal_weight">Berat Ideal</string>
     <string name="result_advice_section">Saran Medis</string>
+    <string name="result_medical_notes">Catatan Medis</string>
     <string name="btn_status_saved">Tersimpan</string>
     <string name="btn_save_result">Simpan Hasil</string>
+    <string name="btn_download_result">Download Hasil</string>
+    <string name="btn_downloading">Memproses...</string>
+
+    <string name="default_user_name">Pengguna</string>
+    <string name="account_section_title">Akun Saya</string>
+    <string name="menu_edit_profile">Ubah Profil</string>
+    <string name="menu_settings">Pengaturan</string>
+    <string name="profile_age_format">%1$s Tahun</string>
+    <string name="profile_set_dob">Atur Tanggal Lahir</string>
+
+    <string name="edit_profile_title">Edit Profil</string>
+    <string name="label_nickname">Nama Panggilan</string>
+    <string name="placeholder_nickname">Nama Anda</string>
+    <string name="label_gender">Jenis Kelamin</string>
+    <string name="gender_male">Laki-laki</string>
+    <string name="gender_female">Perempuan</string>
+    <string name="label_dob">Tanggal Lahir</string>
+    <string name="placeholder_dob">Pilih tanggal lahir Anda</string>
+    <string name="btn_save_changes">Simpan Perubahan</string>
+    <string name="toast_profile_updated">Profil Berhasil Diperbarui</string>
+    <string name="dialog_change_photo_title">Ubah Foto Profil</string>
+    <string name="dialog_change_photo_desc">Pilih foto baru dari galeri atau ambil langsung dengan kamera.</string>
+    <string name="option_camera">Ambil Foto</string>
+    <string name="option_camera_desc">Gunakan kamera</string>
+    <string name="option_gallery">Pilih dari Galeri</string>
+    <string name="option_gallery_desc">Cari di penyimpanan</string>
+
+    <string name="badge_screen_title">Koleksi Pencapaian</string>
+    <string name="badge_section_title">Pencapaian</string>
+    <string name="btn_see_all">Lihat Semua</string>
+    <string name="badge_status_unlocked">Tercapai</string>
+    <string name="badge_status_locked">Belum Didapat</string>
+    <string name="badge_requirement_label">Syarat</string>
+    <string name="badge_dialog_unlocked_title">Pencapaian Terbuka!</string>
+
+    <string name="badge_first_step_title">Langkah Awal</string>
+    <string name="badge_first_step_desc">Melakukan pengecekan BMI untuk pertama kalinya.</string>
+    <string name="badge_first_step_req">Cek BMI 1x</string>
+
+    <string name="badge_streak_1_title">Mulai Rutin</string>
+    <string name="badge_streak_1_desc">Berhasil menjaga streak kesehatan selama 1 bulan.</string>
+    <string name="badge_streak_1_req">Streak 1 Bulan</string>
+
+    <string name="badge_streak_3_title">Makin Konsisten</string>
+    <string name="badge_streak_3_desc">Luar biasa! Konsisten cek kesehatan selama 3 bulan.</string>
+    <string name="badge_streak_3_req">Streak 3 Bulan</string>
+
+    <string name="badge_streak_6_title">Separuh Tahun</string>
+    <string name="badge_streak_6_desc">Setengah tahun perjalanan kesehatan tanpa putus.</string>
+    <string name="badge_streak_6_req">Streak 6 Bulan</string>
+
+    <string name="badge_streak_12_title">Master Kesehatan</string>
+    <string name="badge_streak_12_desc">Satu tahun penuh dedikasi untuk tubuhmu.</string>
+    <string name="badge_streak_12_req">Streak 1 Tahun</string>
+
+    <string name="badge_consistency_3_title">Si Rajin</string>
+    <string name="badge_consistency_3_desc">Melakukan pengecekan sebanyak 3 kali (total).</string>
+    <string name="badge_consistency_3_req">Total 3x Cek</string>
+
+    <string name="badge_ideal_goal_title">Tubuh Ideal</string>
+    <string name="badge_ideal_goal_desc">Mencapai kategori Berat Badan Normal.</string>
+    <string name="badge_ideal_goal_req">Hasil BMI Normal</string>
+
+    <string name="badge_profile_master_title">Profil Lengkap</string>
+    <string name="badge_profile_master_desc">Melengkapi foto profil dan data diri.</string>
+    <string name="badge_profile_master_req">Set Foto Profil</string>
+
+    <string name="badge_night_owl_title">Night Owl</string>
+    <string name="badge_night_owl_desc">Mengecek kesehatan di malam hari.</string>
+    <string name="badge_night_owl_req">Cek BMI di atas jam 9 malam</string>
+
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_section_appearance">Tampilan</string>
+    <string name="settings_dark_mode">Mode Gelap</string>
+    <string name="settings_dark_mode_desc">Sesuaikan kenyamanan mata</string>
+
+    <string name="settings_section_reminder">Pengingat Rutin</string>
+    <string name="settings_reminder_toggle">Ingatkan Saya</string>
+    <string name="settings_reminder_desc">Notifikasi cek BMI 1x sebulan</string>
+    <string name="settings_reminder_schedule">Jadwal Pengingat</string>
+    <string name="settings_reminder_schedule_fmt">Setiap tanggal %1$d, jam 09:00 pagi</string>
+    <string name="btn_test_notification">Tes Notifikasi Sekarang</string>
+
+    <string name="settings_section_help">Bantuan &amp; Info</string>
+    <string name="menu_guide">Panduan Penggunaan</string>
+    <string name="menu_terms">Syarat &amp; Ketentuan</string>
+    <string name="menu_privacy">Kebijakan Privasi</string>
+    <string name="menu_version">Versi Aplikasi</string>
+
+    <string name="dialog_date_picker_title">Pilih Tanggal</string>
+    <string name="dialog_date_picker_desc">Pilih tanggal berapa setiap bulannya Anda ingin diingatkan:</string>
+
+    <string name="notif_channel_name">Pengingat BMI Bulanan</string>
+    <string name="notif_channel_desc">Notifikasi untuk mengingatkan cek BMI rutin</string>
+    <string name="notif_title">Waktunya Cek Kesehatan! 🌿</string>
+    <string name="notif_body">Konsistensi adalah kunci. Yuk luangkan 1 menit untuk update data BMI dan pantau progresmu! 💪</string>
+
+    <string name="guide_title">Panduan Penggunaan</string>
+    <string name="guide_step_1_title">Lengkapi Profil</string>
+    <string name="guide_step_1_desc">Masuk ke menu Profil untuk mengatur nama, foto, tanggal lahir, dan jenis kelamin agar perhitungan lebih personal.</string>
+    <string name="guide_step_2_title">Cek BMI Rutin</string>
+    <string name="guide_step_2_desc">Di menu Beranda, masukkan tinggi dan berat badan Anda, lalu tekan \'Hitung Sekarang\'.</string>
+    <string name="guide_step_3_title">Simpan Hasil</string>
+    <string name="guide_step_3_desc">Setelah hasil keluar, tekan tombol \'Simpan\' agar data masuk ke riwayat dan grafik perkembangan Anda.</string>
+    <string name="guide_step_4_title">Pantau Riwayat</string>
+    <string name="guide_step_4_desc">Buka menu Riwayat untuk melihat tren berat badan Anda dari waktu ke waktu.</string>
+    <string name="guide_step_5_title">Atur Pengingat</string>
+    <string name="guide_step_5_desc">Aktifkan notifikasi di Pengaturan agar Anda tidak lupa mengecek kesehatan setiap bulannya.</string>
+
+    <string name="btn_cancel">Batal</string>
+    <string name="btn_close">Tutup</string>
+    <string name="btn_awesome">Mantap!</string>
+    <string name="btn_delete">Hapus</string>
+    <string name="btn_select">Pilih</string>
+    <string name="btn_exit">Ya, Keluar</string>
 
     <string name="dialog_unsaved_title">Belum Disimpan</string>
-    <string name="dialog_unsaved_desc">Data hasil cek ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?</string>
-    <string name="dialog_action_exit">Ya, Keluar</string>
+    <string name="dialog_unsaved_desc">Data ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?</string>
+    <string name="dialog_unsaved_changes_title">Batalkan Perubahan?</string>
+    <string name="dialog_unsaved_changes_desc">Anda memiliki perubahan yang belum disimpan. Yakin ingin kembali?</string>
+
+    <string name="dialog_delete_title">Hapus Data?</string>
+    <string name="dialog_delete_desc">Data ini akan dihapus permanen.</string>
+    <string name="dialog_delete_single_title">Hapus Data Ini?</string>
+    <string name="dialog_delete_single_desc">Data yang sedang Anda lihat akan dihapus permanen dari penyimpanan.</string>
+
+    <string name="empty_state_title">Belum Ada Data</string>
+    <string name="empty_state_desc">Mulai hidup sehatmu hari ini dengan melakukan pengecekan BMI pertama.</string>
+
+    <string name="terms_title">Syarat &amp; Ketentuan</string>
+    <string name="terms_intro">Mohon baca Syarat dan Ketentuan ini dengan saksama sebelum menggunakan aplikasi myBMI. Penggunaan aplikasi menandakan persetujuan Anda terhadap poin-poin berikut.</string>
+
+    <string name="terms_sec_1_title">1. Lisensi Penggunaan</string>
+    <string name="terms_sec_1_desc">myBMI memberikan Anda lisensi terbatas, non-eksklusif, dan tidak dapat dipindahtangankan untuk menggunakan aplikasi ini semata-mata untuk keperluan pemantauan kesehatan pribadi (non-komersial).</string>
+
+    <string name="terms_sec_2_title">2. Penafian Medis</string>
+    <string name="terms_sec_2_desc">Seluruh hasil perhitungan (BMI, Berat Ideal) dan saran kesehatan hanyalah estimasi statistik. Informasi ini BUKAN diagnosis medis dan tidak dapat menggantikan saran, diagnosis, atau perawatan dari dokter profesional.</string>
+
+    <string name="terms_sec_3_title">3. Akurasi Input Data</string>
+    <string name="terms_sec_3_desc">Anda bertanggung jawab penuh atas keakuratan data (Berat, Tinggi, Umur) yang dimasukkan. Kami tidak bertanggung jawab atas ketidaksesuaian hasil analisis yang disebabkan oleh kesalahan input pengguna.</string>
+
+    <string name="terms_sec_4_title">4. Hak Kekayaan Intelektual</string>
+    <string name="terms_sec_4_desc">Seluruh komponen aplikasi termasuk namun tidak terbatas pada logo, desain antarmuka, kode sumber, dan aset visual adalah hak milik eksklusif pengembang myBMI. Dilarang menyalin atau mendistribusikan ulang tanpa izin.</string>
+
+    <string name="privacy_title">Kebijakan Privasi</string>
+    <string name="privacy_intro">Privasi Anda adalah prioritas mutlak kami. Dokumen ini menjelaskan transparansi myBMI dalam menangani data kesehatan Anda.</string>
+
+    <string name="privacy_sec_1_title">1. Penyimpanan Lokal (Offline)</string>
+    <string name="privacy_sec_1_desc">Aplikasi ini beroperasi sepenuhnya secara lokal. Seluruh data kesehatan dan profil Anda disimpan secara terenkripsi di dalam penyimpanan internal HP Anda. Tidak ada data yang dikirim ke server cloud manapun.</string>
+
+    <string name="privacy_sec_2_title">2. Penggunaan Izin Akses</string>
+    <string name="privacy_sec_2_desc">Kami hanya meminta izin yang esensial:\n• Kamera &amp; Galeri: Untuk mengubah foto profil (opsional).\n• Notifikasi: Untuk menjadwalkan pengingat cek rutin di perangkat Anda.</string>
+
+    <string name="privacy_sec_3_title">3. Bebas Pelacakan</string>
+    <string name="privacy_sec_3_desc">Untuk menjamin ketenangan Anda, aplikasi ini bebas dari pelacak iklan (ad-trackers), analitik pihak ketiga, ataupun pengumpulan data perilaku pengguna secara diam-diam.</string>
+
+    <string name="privacy_sec_4_title">4. Kendali Data</string>
+    <string name="privacy_sec_4_desc">Data Anda sepenuhnya milik Anda. Anda dapat menghapus item riwayat kapan saja. Menghapus aplikasi (Uninstall) juga akan secara permanen menghapus seluruh database dari perangkat.</string>
+
+    <string name="last_updated_fmt">Terakhir diperbarui: %1$s</string>
 </resources>

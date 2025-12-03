@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.home
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.AchievementDialog
 import af.mobile.mybmi.components.GradientScreenLayout
 import af.mobile.mybmi.components.ModernDialogContainer
@@ -33,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import af.mobile.mybmi.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,7 +58,6 @@ fun HomeScreen(
     val isReminderEnabled by reminderViewModel.isReminderEnabled.collectAsState()
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
 
-    // AMBIL DATA STREAK
     val newBadges by resultViewModel.newlyUnlockedBadges.collectAsState()
     val streakCount by resultViewModel.streakCount.collectAsState()
 
@@ -110,12 +109,13 @@ fun HomeScreen(
                         )
                     }
 
-                    // --- STREAK BADGE  ---
+                    // STREAK BADGE
                     StreakBadge(count = streakCount)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
+                // JADWAL CARD (REFACTORED)
                 ScheduleStatusCard(
                     isEnabled = isReminderEnabled,
                     day = reminderDay,
@@ -124,7 +124,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Input Card
+                // INPUT CARD
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -183,7 +183,6 @@ fun HomeScreen(
 @Composable
 fun StreakBadge(count: Int) {
     val isActive = count > 0
-
     val iconColor = if (isActive) StatusStreak else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     val textColor = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
 
@@ -195,20 +194,15 @@ fun StreakBadge(count: Int) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-                .clickable { /* Opsional: Bisa tambah aksi klik nanti (misal: info streak) */ }
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Icon(
                 imageVector = Icons.Rounded.LocalFireDepartment,
-                contentDescription = "Streak",
+                contentDescription = null,
                 tint = iconColor,
                 modifier = Modifier.size(20.dp)
             )
-
             Spacer(modifier = Modifier.width(6.dp))
-
-            // Teks Angka
             Text(
                 text = "$count",
                 style = MaterialTheme.typography.titleMedium,
@@ -219,14 +213,18 @@ fun StreakBadge(count: Int) {
     }
 }
 
-// --- Helper Composable ---
 @Composable
 fun ScheduleStatusCard(isEnabled: Boolean, day: Int, onClick: () -> Unit) {
     val containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
     val contentColor = MaterialTheme.colorScheme.onSurface
     val icon = if (isEnabled) Icons.Rounded.CalendarMonth else Icons.Rounded.NotificationsOff
     val iconBgColor = if (isEnabled) BrandPrimary else MaterialTheme.colorScheme.error
-    val titleText = if (isEnabled) "Jadwal Cek Berikutnya" else "Pengingat Rutin Mati"
+
+    // String Resources
+    val titleText = if (isEnabled)
+        stringResource(R.string.reminder_title_on)
+    else
+        stringResource(R.string.reminder_title_off)
 
     val subtitleText = remember(isEnabled, day) {
         if (isEnabled) {
@@ -235,8 +233,12 @@ fun ScheduleStatusCard(isEnabled: Boolean, day: Int, onClick: () -> Unit) {
             if (today.get(Calendar.DAY_OF_MONTH) > day) targetDate.add(Calendar.MONTH, 1)
             val localeID = Locale.forLanguageTag("id-ID")
             SimpleDateFormat("dd MMMM yyyy", localeID).format(targetDate.time)
-        } else "Ketuk untuk atur jadwal"
+        } else {
+            ""
+        }
     }
+
+    val finalSubtitle = if (isEnabled) subtitleText else stringResource(R.string.reminder_subtitle_off)
 
     Row(
         modifier = Modifier
@@ -254,10 +256,10 @@ fun ScheduleStatusCard(isEnabled: Boolean, day: Int, onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(titleText, style = MaterialTheme.typography.labelMedium, color = contentColor.copy(alpha = 0.7f))
-            Text(subtitleText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = contentColor)
+            Text(finalSubtitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = contentColor)
         }
         Spacer(modifier = Modifier.weight(1f))
-        if (!isEnabled) Icon(Icons.Rounded.Notifications, "Setup", tint = BrandPrimary, modifier = Modifier.size(20.dp))
+        if (!isEnabled) Icon(Icons.Rounded.Notifications, null, tint = BrandPrimary, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -269,18 +271,19 @@ fun NameInputDialog(onConfirm: (String) -> Unit) {
             Icon(Icons.Rounded.Person, null, tint = BrandPrimary, modifier = Modifier.size(28.dp))
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Selamat Datang!", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(R.string.dialog_name_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Siapa nama panggilanmu?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.dialog_name_question), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.height(24.dp))
         OutlinedTextField(
-            value = name, onValueChange = { name = it }, placeholder = { Text("Contoh: Budi") },
+            value = name, onValueChange = { name = it },
+            placeholder = { Text(stringResource(R.string.dialog_name_placeholder)) },
             shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = BrandPrimary, cursorColor = BrandPrimary), singleLine = true
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = { if (name.isNotBlank()) onConfirm(name) }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary, contentColor = Color.White)) {
-            Text("Mulai Sekarang", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.btn_start_now), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

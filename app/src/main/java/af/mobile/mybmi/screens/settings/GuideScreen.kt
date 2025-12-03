@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.settings
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.StandardScreenLayout
 import af.mobile.mybmi.theme.BrandPrimary
 import androidx.compose.foundation.background
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -21,7 +23,7 @@ fun GuideScreen(
     onNavigateBack: () -> Unit
 ) {
     StandardScreenLayout(
-        title = "Panduan Penggunaan",
+        title = stringResource(R.string.guide_title),
         onBack = onNavigateBack
     ) {
         Column(
@@ -30,11 +32,31 @@ fun GuideScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GuideCard(1, "Lengkapi Profil", "Masuk ke menu Profil untuk mengatur nama, foto, tanggal lahir, dan jenis kelamin agar perhitungan lebih personal.")
-            GuideCard(2, "Cek BMI Rutin", "Di menu Beranda, masukkan tinggi dan berat badan Anda, lalu tekan 'Hitung Sekarang'.")
-            GuideCard(3, "Simpan Hasil", "Setelah hasil keluar, tekan tombol 'Simpan' agar data masuk ke riwayat dan grafik perkembangan Anda.")
-            GuideCard(4, "Pantau Riwayat", "Buka menu Riwayat untuk melihat tren berat badan Anda dari waktu ke waktu.")
-            GuideCard(5, "Atur Pengingat", "Aktifkan notifikasi di Pengaturan agar Anda tidak lupa mengecek kesehatan setiap bulannya.")
+            GuideCard(
+                number = 1,
+                title = stringResource(R.string.guide_step_1_title),
+                description = stringResource(R.string.guide_step_1_desc)
+            )
+            GuideCard(
+                number = 2,
+                title = stringResource(R.string.guide_step_2_title),
+                description = stringResource(R.string.guide_step_2_desc)
+            )
+            GuideCard(
+                number = 3,
+                title = stringResource(R.string.guide_step_3_title),
+                description = stringResource(R.string.guide_step_3_desc)
+            )
+            GuideCard(
+                number = 4,
+                title = stringResource(R.string.guide_step_4_title),
+                description = stringResource(R.string.guide_step_4_desc)
+            )
+            GuideCard(
+                number = 5,
+                title = stringResource(R.string.guide_step_5_title),
+                description = stringResource(R.string.guide_step_5_desc)
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }

@@ -1,11 +1,12 @@
 package af.mobile.mybmi.screens.profile
 
+import af.mobile.mybmi.R
+import af.mobile.mybmi.components.ClickableMenuItem
 import af.mobile.mybmi.screens.profile.components.BadgeGrid
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.UserViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -20,10 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import af.mobile.mybmi.R
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
@@ -38,16 +37,22 @@ fun ProfileScreen(
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
     val userBadges by userViewModel?.userBadges?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
 
-    // --- STRUKTUR UTAMA ---
-    // Scroll dipindahkan ke SINI (Root Column) agar header ikut tergulir
+    val ageText = if (currentUser != null) {
+        if (currentUser!!.birthDate == 0L) {
+            stringResource(R.string.profile_set_dob)
+        } else {
+            val age = currentUser!!.getAgeInYears()
+            stringResource(R.string.profile_age_format, age)
+        }
+    } else ""
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState()) // <--- Scrollable Parent
+            .verticalScroll(rememberScrollState())
     ) {
-        // --- BAGIAN 1: HEADER ---
-        // Tidak perlu logic fixed/weight lagi. Cukup Box biasa.
+        // --- HEADER ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,7 +98,7 @@ fun ProfileScreen(
                 // Info Umur
                 if (currentUser != null) {
                     Text(
-                        text = "${currentUser!!.gender} • ${currentUser!!.getAgeDisplayString()}",
+                        text = "${currentUser!!.gender} • $ageText",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -125,35 +130,21 @@ fun ProfileScreen(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                ProfileMenuItem(
-                    Icons.Rounded.Edit,
-                    stringResource(R.string.menu_edit_profile),
-                    onNavigateToEdit
+                ClickableMenuItem(
+                    icon = Icons.Rounded.Edit,
+                    title = stringResource(R.string.menu_edit_profile),
+                    onClick = onNavigateToEdit,
+                    showDivider = true
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                ProfileMenuItem(
-                    Icons.Rounded.Settings,
-                    stringResource(R.string.menu_settings),
-                    onNavigateToSettings)
+                ClickableMenuItem(
+                    icon = Icons.Rounded.Settings,
+                    title = stringResource(R.string.menu_settings),
+                    onClick = onNavigateToSettings,
+                    showDivider = false
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-}
-
-@Composable
-fun ProfileMenuItem(icon: ImageVector, title: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, null, tint = BrandPrimary)
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

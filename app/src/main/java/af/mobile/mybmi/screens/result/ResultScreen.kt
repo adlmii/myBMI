@@ -1,6 +1,7 @@
 package af.mobile.mybmi.screens.result
 
-import af.mobile.mybmi.components.*
+import af.mobile.mybmi.R
+import af.mobile.mybmi.components.* // Import semua komponen yang baru kita buat
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
@@ -10,15 +11,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.res.stringResource
-import af.mobile.mybmi.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -37,9 +36,6 @@ fun ResultScreen(
     BackHandler(enabled = !isSaved) { showUnsavedDialog = true }
 
     currentResult?.let { summary ->
-        val statusColor = getStatusColor(summary.category)
-
-        // Gunakan Layout Standar
         StandardScreenLayout(
             title = stringResource(R.string.result_screen_title),
             onBack = { if (isSaved) onNavigateBack() else showUnsavedDialog = true }
@@ -48,63 +44,20 @@ fun ResultScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // BIG BMI INDICATOR
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(
-                        progress = { 1f },
-                        modifier = Modifier.size(200.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        strokeWidth = 15.dp,
-                    )
-                    CircularProgressIndicator(
-                        progress = { (summary.bmi.toFloat() / 40f).coerceIn(0f, 1f) },
-                        modifier = Modifier.size(200.dp),
-                        color = statusColor,
-                        strokeWidth = 15.dp,
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = summary.bmi.toString(),
-                            style = MaterialTheme.typography.displayMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            stringResource(R.string.label_bmi),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
+                // 1. REUSABLE BMI INDICATOR
+                BigBMIIndicator(
+                    bmiValue = summary.bmi,
+                    category = summary.category
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // STATUS CARD
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp).fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = summary.category.displayName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = statusColor
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = summary.category.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                // 2. REUSABLE STATUS CARD
+                BMIStatusCard(category = summary.category)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // DETAILS CARD (Menggunakan InfoRow agar lebih rapi)
+                // 3. DETAIL INFO (MENGGUNAKAN AppCommon.kt -> DetailRow)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -121,17 +74,9 @@ fun ResultScreen(
                         }
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Refactor pakai InfoRow (Harus ditambahkan ke AppCommon.kt atau AppCards.kt sesuai saran sebelumnya)
-                        // Jika belum ada InfoRow, gunakan DetailRow yang lama
-                        DetailRow(
-                            stringResource(R.string.label_weight),
-                            "${summary.weight} kg"
-                        )
+                        DetailRow(stringResource(R.string.label_weight), "${summary.weight} kg")
                         CustomDivider()
-                        DetailRow(
-                            stringResource(R.string.label_height),
-                            "${summary.height} cm"
-                        )
+                        DetailRow(stringResource(R.string.label_height), "${summary.height} cm")
                         CustomDivider()
                         DetailRow(
                             stringResource(R.string.label_ideal_weight),
@@ -143,33 +88,17 @@ fun ResultScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ADVICE CARD
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        Text(
-                            stringResource(R.string.result_advice_section),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            summary.category.advice,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                // 4. REUSABLE ADVICE CARD
+                BMIAdviceCard(
+                    advice = summary.category.advice,
+                    title = stringResource(R.string.result_advice_section)
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // TOMBOL SIMPAN
+                // BUTTONS
                 PrimaryButton(
-                    text = if (isSaved)
-                        stringResource(R.string.btn_status_saved)
-                    else
-                        stringResource(R.string.btn_save_result),
+                    text = if (isSaved) stringResource(R.string.btn_status_saved) else stringResource(R.string.btn_save_result),
                     onClick = {
                         if (!isSaved && currentUser != null) {
                             resultViewModel.saveToHistory(summary, currentUser!!.id)
@@ -182,7 +111,7 @@ fun ResultScreen(
             }
         }
 
-        // Dialog Belum Disimpan (ModernAlertDialog sudah ada)
+        // Dialog Unsaved
         if (showUnsavedDialog) {
             ModernAlertDialog(
                 onDismiss = { showUnsavedDialog = false },
@@ -190,7 +119,7 @@ fun ResultScreen(
                 description = stringResource(R.string.dialog_unsaved_desc),
                 icon = Icons.Rounded.Warning,
                 mainColor = StatusObese,
-                positiveText = stringResource(R.string.dialog_action_exit),
+                positiveText = stringResource(R.string.btn_exit),
                 onPositive = {
                     showUnsavedDialog = false
                     resultViewModel.clearCurrentResult()

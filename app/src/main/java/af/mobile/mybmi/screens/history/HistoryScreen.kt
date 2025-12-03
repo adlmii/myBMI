@@ -1,5 +1,6 @@
 package af.mobile.mybmi.screens.history
 
+import af.mobile.mybmi.R
 import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
@@ -18,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,17 +58,17 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                // 1. JUDUL HALAMAN (Disamakan dengan Home/Profile)
+                // 1. JUDUL HALAMAN
                 item {
                     Column {
                         Text(
-                            text = "Analisis Kesehatan",
-                            style = MaterialTheme.typography.headlineMedium, // Ukuran font standar
+                            text = stringResource(R.string.history_title),
+                            style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = "Pantau tren dan riwayatmu",
+                            text = stringResource(R.string.history_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -87,7 +89,7 @@ fun HistoryScreen(
                 // 3. SECTION HEADER
                 item {
                     Text(
-                        text = "Riwayat Terbaru",
+                        text = stringResource(R.string.history_recent_section),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -117,11 +119,11 @@ fun HistoryScreen(
     if (showDeleteDialog && itemToDelete != null) {
         ModernAlertDialog(
             onDismiss = { showDeleteDialog = false; itemToDelete = null },
-            title = "Hapus Data?",
-            description = "Data ini akan dihapus permanen.",
+            title = stringResource(R.string.dialog_delete_title),
+            description = stringResource(R.string.dialog_delete_desc),
             icon = Icons.Rounded.Delete,
             mainColor = StatusObese,
-            positiveText = "Hapus",
+            positiveText = stringResource(R.string.btn_delete),
             onPositive = {
                 itemToDelete?.let { resultViewModel.deleteHistory(it) }
                 showDeleteDialog = false
@@ -192,13 +194,13 @@ fun LockedTrendCard() {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Grafik Belum Tersedia",
+                    text = stringResource(R.string.chart_locked_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Lakukan cek rutin untuk membuka grafik.",
+                    text = stringResource(R.string.chart_locked_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -229,12 +231,12 @@ fun EmptyHistoryState(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Belum Ada Data",
+            text = stringResource(R.string.empty_history_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Mulai cek kesehatanmu sekarang!",
+            text = stringResource(R.string.empty_history_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
