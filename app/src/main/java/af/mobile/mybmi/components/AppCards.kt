@@ -69,7 +69,7 @@ fun ModernHistoryCard(
                     text = summary.getDateFormatted(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.Bold // Warning 1 Fixed: Removed redundant qualifier
                 )
                 Text(
                     text = "${summary.weight} kg • BMI ${summary.bmi}",
@@ -157,5 +157,6 @@ fun InfoRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurface
         )
     }
-    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    // Warning 2 Fixed: Replaced Divider with HorizontalDivider
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }

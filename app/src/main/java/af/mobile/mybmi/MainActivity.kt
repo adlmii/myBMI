@@ -3,11 +3,14 @@ package af.mobile.mybmi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
@@ -45,16 +48,16 @@ import af.mobile.mybmi.screens.settings.PrivacyPolicyScreen
 import af.mobile.mybmi.screens.settings.TermsScreen
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.*
+import androidx.compose.material.icons.rounded.BarChart
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Inject ThemeViewModel langsung
             val themeViewModel: ThemeViewModel = hiltViewModel()
 
-            // Setup Theme (Auto/Manual)
+            // Setup Theme
             val systemInDarkTheme = isSystemInDarkTheme()
             LaunchedEffect(Unit) {
                 themeViewModel.initializeTheme(systemInDarkTheme)
@@ -62,7 +65,6 @@ class MainActivity : ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
             myBMITheme(isDarkMode = isDarkMode) {
-                // Tidak perlu lagi inisialisasi Database/Repository manual
                 MyBMIApp(themeViewModel = themeViewModel)
             }
         }
@@ -75,8 +77,6 @@ fun MyBMIApp(
 ) {
     val navController = rememberNavController()
 
-    // INJECT VIEWMODEL OTOMATIS DENGAN HILT
-    // Hilt akan mengurus semua dependency (Repo, DAO, Context) di balik layar
     val inputViewModel: InputViewModel = hiltViewModel()
     val reminderViewModel: ReminderViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
@@ -85,7 +85,6 @@ fun MyBMIApp(
     val currentUser by userViewModel.currentUser.collectAsState()
     val userId = currentUser?.id ?: 0
 
-    // Load history otomatis saat user login/terdeteksi
     LaunchedEffect(userId) {
         if (userId > 0) {
             resultViewModel.loadHistory(userId)
@@ -118,7 +117,33 @@ fun MyBMIApp(
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+
+            // --- ANIMASI TRANSISI LAYAR (SLIDE) ---
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            }
         ) {
             // SCREEN: SPLASH
             composable(Screen.Splash.route) {
@@ -297,7 +322,7 @@ fun BottomNavigationBar(
 
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
     object Home : BottomNavItem(Screen.Home.route, Icons.Rounded.Home, "Beranda")
-    object History : BottomNavItem(Screen.History.route, Icons.Rounded.History, "Riwayat")
+    object History : BottomNavItem(Screen.History.route, Icons.Rounded.BarChart, "Analisis")
     object Profile : BottomNavItem(Screen.Profile.route, Icons.Rounded.Person, "Profil")
 }
 

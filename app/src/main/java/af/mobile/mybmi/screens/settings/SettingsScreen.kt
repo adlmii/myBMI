@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -180,7 +181,8 @@ fun SettingsScreen(
                 ListItem(
                     modifier = Modifier.clickable { onNavigateToGuide() },
                     headlineContent = { Text("Panduan Penggunaan") },
-                    leadingContent = { Icon(Icons.Rounded.Help, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    // Use AutoMirrored version here
+                    leadingContent = { Icon(Icons.AutoMirrored.Rounded.Help, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     trailingContent = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
