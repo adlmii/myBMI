@@ -69,7 +69,7 @@ fun HistoryDetailScreen(
                         Box(
                             modifier = Modifier
                                 .padding(16.dp)
-                                .navigationBarsPadding() // Agar tidak tertutup gesture bar HP
+                                .navigationBarsPadding()
                         ) {
                             PrimaryButton(
                                 text = if (isCapturing) "Memproses..." else "Download Hasil",
@@ -77,16 +77,23 @@ fun HistoryDetailScreen(
                                     coroutineScope.launch {
                                         isCapturing = true
                                         hideUIForScreenshot = true
-                                        delay(500) // Tunggu UI update (tombol hilang)
+                                        delay(500)
+
                                         try {
                                             val bitmap = ImageUtils.captureViewToBitmap(view)
                                             val filename = "BMI_Result_${System.currentTimeMillis()}"
-                                            val success = ImageUtils.saveBitmapToGallery(context, bitmap, filename)
-                                            if (success) Toast.makeText(context, "Hasil tersimpan di Galeri!", Toast.LENGTH_SHORT).show()
-                                            else Toast.makeText(context, "Gagal menyimpan.", Toast.LENGTH_SHORT).show()
+
+                                            // PANGGIL FUNGSI BARU (Akan throw error jika gagal)
+                                            val message = ImageUtils.saveBitmapToGallery(context, bitmap, filename)
+
+                                            // Jika sampai sini, berarti sukses
+                                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+
                                         } catch (e: Exception) {
+                                            // TANGKAP ERROR DI SINI
                                             e.printStackTrace()
-                                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            // Tampilkan pesan error spesifik ke user
+                                            Toast.makeText(context, "Gagal: ${e.message}", Toast.LENGTH_LONG).show()
                                         } finally {
                                             hideUIForScreenshot = false
                                             isCapturing = false

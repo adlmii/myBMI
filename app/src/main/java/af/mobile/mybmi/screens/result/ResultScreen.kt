@@ -1,6 +1,6 @@
 package af.mobile.mybmi.screens.result
 
-import af.mobile.mybmi.components.* // Import StandardScreenLayout, InfoRow, PrimaryButton, dll
+import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel
@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
+import af.mobile.mybmi.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +41,7 @@ fun ResultScreen(
 
         // Gunakan Layout Standar
         StandardScreenLayout(
-            title = "Hasil Analisa",
+            title = stringResource(R.string.result_screen_title),
             onBack = { if (isSaved) onNavigateBack() else showUnsavedDialog = true }
         ) {
             Column(
@@ -67,7 +69,10 @@ fun ResultScreen(
                             color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold
                         )
-                        Text("BMI", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            stringResource(R.string.label_bmi),
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
 
@@ -109,17 +114,30 @@ fun ResultScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Rounded.Info, null, tint = BrandPrimary)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("Informasi Lengkap", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                stringResource(R.string.result_info_section),
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Refactor pakai InfoRow (Harus ditambahkan ke AppCommon.kt atau AppCards.kt sesuai saran sebelumnya)
                         // Jika belum ada InfoRow, gunakan DetailRow yang lama
-                        DetailRow("Berat Badan", "${summary.weight} kg")
+                        DetailRow(
+                            stringResource(R.string.label_weight),
+                            "${summary.weight} kg"
+                        )
                         CustomDivider()
-                        DetailRow("Tinggi Badan", "${summary.height} cm")
+                        DetailRow(
+                            stringResource(R.string.label_height),
+                            "${summary.height} cm"
+                        )
                         CustomDivider()
-                        DetailRow("Berat Ideal", "${summary.idealWeightRange.first.toInt()} - ${summary.idealWeightRange.second.toInt()} kg", isHighlight = true)
+                        DetailRow(
+                            stringResource(R.string.label_ideal_weight),
+                            "${summary.idealWeightRange.first.toInt()} - ${summary.idealWeightRange.second.toInt()} kg",
+                            isHighlight = true
+                        )
                     }
                 }
 
@@ -131,9 +149,16 @@ fun ResultScreen(
                     shape = RoundedCornerShape(24.dp)
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
-                        Text("Saran Medis", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(R.string.result_advice_section),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(summary.category.advice, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            summary.category.advice,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 
@@ -141,7 +166,10 @@ fun ResultScreen(
 
                 // TOMBOL SIMPAN
                 PrimaryButton(
-                    text = if (isSaved) "Tersimpan" else "Simpan Hasil",
+                    text = if (isSaved)
+                        stringResource(R.string.btn_status_saved)
+                    else
+                        stringResource(R.string.btn_save_result),
                     onClick = {
                         if (!isSaved && currentUser != null) {
                             resultViewModel.saveToHistory(summary, currentUser!!.id)
@@ -158,11 +186,11 @@ fun ResultScreen(
         if (showUnsavedDialog) {
             ModernAlertDialog(
                 onDismiss = { showUnsavedDialog = false },
-                title = "Belum Disimpan",
-                description = "Data hasil cek ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?",
+                title = stringResource(R.string.dialog_unsaved_title),
+                description = stringResource(R.string.dialog_unsaved_desc),
                 icon = Icons.Rounded.Warning,
                 mainColor = StatusObese,
-                positiveText = "Ya, Keluar",
+                positiveText = stringResource(R.string.dialog_action_exit),
                 onPositive = {
                     showUnsavedDialog = false
                     resultViewModel.clearCurrentResult()

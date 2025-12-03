@@ -1,3 +1,38 @@
 <resources>
     <string name="app_name">myBMI</string>
+
+
+    <!-- HOME SCREEN -->
+    <string name="welcome_default">Selamat Datang</string>
+    <string name="welcome_user">Halo, %1$s</string> <string name="home_subtitle">Cek Kesehatanmu</string>
+    <string name="input_card_title">Kalkulator BMI</string>
+    <string name="label_height">Tinggi Badan</string>
+    <string name="label_weight">Berat Badan</string>
+    <string name="hint_height">Contoh: 170</string>
+    <string name="hint_weight">Contoh: 65</string>
+    <string name="suffix_cm">cm</string>
+    <string name="suffix_kg">kg</string>
+    <string name="btn_calculate">Hitung Sekarang</string>
+
+    <string name="reminder_title_on">Jadwal Cek Berikutnya</string>
+    <string name="reminder_title_off">Pengingat Rutin Mati</string>
+    <string name="reminder_subtitle_off">Ketuk untuk atur jadwal</string>
+
+    <!-- PROFILE & RESULT SCREEN -->
+    <string name="default_user_name">Pengguna</string>
+    <string name="account_section_title">Akun Saya</string>
+    <string name="menu_edit_profile">Ubah Profil</string>
+    <string name="menu_settings">Pengaturan</string>
+
+    <string name="result_screen_title">Hasil Analisa</string>
+    <string name="label_bmi">BMI</string>
+    <string name="result_info_section">Informasi Lengkap</string>
+    <string name="label_ideal_weight">Berat Ideal</string>
+    <string name="result_advice_section">Saran Medis</string>
+    <string name="btn_status_saved">Tersimpan</string>
+    <string name="btn_save_result">Simpan Hasil</string>
+
+    <string name="dialog_unsaved_title">Belum Disimpan</string>
+    <string name="dialog_unsaved_desc">Data hasil cek ini akan hilang jika Anda kembali sekarang. Yakin ingin keluar?</string>
+    <string name="dialog_action_exit">Ya, Keluar</string>
 </resources>

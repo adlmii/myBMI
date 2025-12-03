@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import af.mobile.mybmi.R
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
@@ -83,7 +85,7 @@ fun ProfileScreen(
 
                 // Nama
                 Text(
-                    text = currentUser?.name ?: "Pengguna",
+                    text = currentUser?.name ?: stringResource(R.string.default_user_name),
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White
                 )
@@ -114,7 +116,7 @@ fun ProfileScreen(
 
             // Menu Akun
             Text(
-                text = "Akun Saya",
+                text = stringResource(R.string.account_section_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -123,9 +125,16 @@ fun ProfileScreen(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                ProfileMenuItem(Icons.Rounded.Edit, "Ubah Profil", onNavigateToEdit)
+                ProfileMenuItem(
+                    Icons.Rounded.Edit,
+                    stringResource(R.string.menu_edit_profile),
+                    onNavigateToEdit
+                )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                ProfileMenuItem(Icons.Rounded.Settings, "Pengaturan", onNavigateToSettings)
+                ProfileMenuItem(
+                    Icons.Rounded.Settings,
+                    stringResource(R.string.menu_settings),
+                    onNavigateToSettings)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

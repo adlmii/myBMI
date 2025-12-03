@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import af.mobile.mybmi.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -94,12 +96,15 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (currentUser != null) "Halo, ${currentUser!!.name}" else "Selamat Datang",
+                            text = if (currentUser != null)
+                                stringResource(R.string.welcome_user, currentUser!!.name)
+                            else
+                                stringResource(R.string.welcome_default),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = "Cek Kesehatanmu",
+                            text = stringResource(R.string.home_subtitle),
                             style = MaterialTheme.typography.headlineMedium,
                             color = Color.White
                         )
@@ -129,32 +134,32 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
-                            text = "Kalkulator BMI",
+                            text = stringResource(R.string.input_card_title),
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
 
                         ModernInput(
-                            label = "Tinggi Badan",
+                            label = stringResource(R.string.label_height),
                             value = input.height,
                             onValueChange = { inputViewModel.updateHeight(it) },
-                            suffix = "cm",
-                            placeholderText = "Contoh: 170"
+                            suffix = stringResource(R.string.suffix_cm),
+                            placeholderText = stringResource(R.string.hint_height)
                         )
 
                         ModernInput(
-                            label = "Berat Badan",
+                            label = stringResource(R.string.label_weight),
                             value = input.weight,
                             onValueChange = { inputViewModel.updateWeight(it) },
-                            suffix = "kg",
-                            placeholderText = "Contoh: 65"
+                            suffix = stringResource(R.string.suffix_kg),
+                            placeholderText = stringResource(R.string.hint_weight)
                         )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
                         PrimaryButton(
-                            text = "Hitung Sekarang",
+                            text = stringResource(R.string.btn_calculate),
                             onClick = {
                                 inputViewModel.calculateBMI { summary -> onNavigateToResult(summary) }
                                 inputViewModel.clearInput()

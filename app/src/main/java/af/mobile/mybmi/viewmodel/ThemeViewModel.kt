@@ -1,43 +1,48 @@
 package af.mobile.mybmi.viewmodel
 
-import android.app.Application
-import android.content.Context
-import androidx.core.content.edit
-import androidx.lifecycle.AndroidViewModel
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ThemeViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ThemeViewModel @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) : ViewModel() {
 
-    private val PREFS_NAME = "mybmi_theme_prefs"
-    private val KEY_IS_DARK = "is_dark_mode"
-
-    private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    // Kunci untuk menyimpan data
+    private val KEY_IS_DARK = booleanPreferencesKey("is_dark_mode")
 
     private val _isDarkMode = MutableStateFlow(false)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode
 
-    private var isInitialized = false
-
+    // Fungsi inisialisasi sekarang memantau DataStore
     fun initializeTheme(isSystemDark: Boolean) {
-        if (isInitialized) return
-
-        if (prefs.contains(KEY_IS_DARK)) {
-            _isDarkMode.value = prefs.getBoolean(KEY_IS_DARK, false)
-        } else {
-            _isDarkMode.value = isSystemDark
+        viewModelScope.launch {
+            dataStore.data.map { preferences ->
+                // Jika belum ada setting (null), gunakan setting sistem
+                preferences[KEY_IS_DARK] ?: isSystemDark
+            }.collect { isDark ->
+                _isDarkMode.value = isDark
+            }
         }
-        isInitialized = true
     }
 
     fun toggleDarkMode() {
-        val newValue = !_isDarkMode.value
-        _isDarkMode.value = newValue
-
-        // LEBIH BERSIH: Menggunakan KTX extension
-        // Blok ini otomatis melakukan .apply() setelah selesai
-        prefs.edit {
-            putBoolean(KEY_IS_DARK, newValue)
+        viewModelScope.launch {
+            // Edit data secara asynchronous
+            dataStore.edit { preferences ->
+                val current = preferences[KEY_IS_DARK] ?: _isDarkMode.value
+                preferences[KEY_IS_DARK] = !current
+            }
         }
     }
 }

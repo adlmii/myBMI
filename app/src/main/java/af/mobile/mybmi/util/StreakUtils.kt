@@ -1,7 +1,7 @@
 package af.mobile.mybmi.util
 
 import af.mobile.mybmi.model.BMICheckSummary
-import java.util.Calendar
+import java.time.ZoneId
 
 object StreakUtils {
 
@@ -11,40 +11,45 @@ object StreakUtils {
         // 1. Urutkan dari TERLAMA ke TERBARU
         val sortedHistory = history.sortedBy { it.timestamp }
 
+        // 2. Konversi Date (Legacy) ke LocalDate (Modern)
+        val dates = sortedHistory.map {
+            it.timestamp.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+        }
+
         var streak = 1
-        // Anchor adalah "Jadwal" patokan saat ini
-        var anchorDate = Calendar.getInstance().apply { time = sortedHistory[0].timestamp }
+        var anchorDate = dates[0] // Patokan tanggal (bulan) saat ini
 
-        // Loop dari data kedua sampai terakhir
-        for (i in 1 until sortedHistory.size) {
-            val checkDate = Calendar.getInstance().apply { time = sortedHistory[i].timestamp }
+        for (i in 1 until dates.size) {
+            val checkDate = dates[i]
 
-            // Window Valid: Mulai dari (Anchor + 1 Bulan) sampai (Anchor + 2 Bulan)
-            val validStart = (anchorDate.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
-            val validEnd = (anchorDate.clone() as Calendar).apply { add(Calendar.MONTH, 2) }
+            // Hitung selisih bulan secara absolut (tahun * 12 + bulan)
+            val monthsDiff = (checkDate.year - anchorDate.year) * 12 + (checkDate.monthValue - anchorDate.monthValue)
 
-            if (checkDate.before(validStart)) {
-                // KASUS: UPDATE BIASA (Terlalu Cepat)
+            if (monthsDiff == 0) {
+                // KASUS: Cek lagi di bulan yang SAMA -> Abaikan (Update biasa)
                 continue
-            } else if (checkDate.after(validEnd)) {
-                // KASUS: TELAT (Streak Putus)
-                streak = 1
+            } else if (monthsDiff == 1) {
+                // KASUS: Cek di bulan BERIKUTNYA (Berurutan) -> Streak Nambah
+                streak++
                 anchorDate = checkDate
             } else {
-                // KASUS: TEPAT WAKTU (Valid Streak)
-                streak++
+                // KASUS: Bolong lebih dari 1 bulan -> Streak Reset
+                streak = 1
                 anchorDate = checkDate
             }
         }
 
-        // 2. VALIDASI TERAKHIR (Cek Status Hari Ini)
-        val today = Calendar.getInstance()
+        // 3. VALIDASI TERAKHIR (Cek Status Hari Ini)
+        // Apakah streak masih aktif atau sudah kadaluwarsa?
+        val today = java.time.LocalDate.now()
+        val monthsSinceLastCheck = (today.year - anchorDate.year) * 12 + (today.monthValue - anchorDate.monthValue)
 
-        // Batas akhir streak saat ini adalah Anchor Terakhir + 2 Bulan
-        val expiryDate = (anchorDate.clone() as Calendar).apply { add(Calendar.MONTH, 2) }
-
-        // Jika hari ini sudah lewat dari batas akhir, berarti user sudah bolos > 1 bulan.
-        if (today.after(expiryDate)) {
+        // Jika sudah lewat lebih dari 1 bulan sejak cek terakhir, streak hangus.
+        // Contoh: Terakhir cek Januari. Sekarang Maret. (Diff = 2) -> Hangus.
+        // Toleransi: Kita anggap streak masih aktif selama belum lewat bulan depannya lagi.
+        if (monthsSinceLastCheck > 1) {
             return 0
         }
 

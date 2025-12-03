@@ -9,6 +9,7 @@ import af.mobile.mybmi.util.BadgeManager
 import af.mobile.mybmi.util.StreakUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,12 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ResultViewModel(
-    private val bmiRepository: BMIRepository? = null,
-    private val badgeDao: BadgeDao? = null,
-    private val bmiDao: BMIDao? = null,
-    private val currentUserId: Int = 0
+@HiltViewModel
+class ResultViewModel @Inject constructor(
+    private val bmiRepository: BMIRepository,
+    private val badgeDao: BadgeDao,
+    private val bmiDao: BMIDao
 ) : ViewModel() {
 
     // Current result yang sedang ditampilkan
@@ -64,23 +66,19 @@ class ResultViewModel(
         _currentResult.value = null
     }
 
-    fun saveToHistory(summary: BMICheckSummary, userId: Int = 0) {
+    fun saveToHistory(summary: BMICheckSummary, userId: Int) {
+        if (userId <= 0) return
+
         viewModelScope.launch {
-            val idToUse = if (userId > 0) userId else currentUserId
+            // 1. Simpan Data BMI
+            bmiRepository.saveBMI(userId, summary)
 
-            if (bmiRepository != null && idToUse > 0) {
-                // 1. Simpan Data BMI
-                bmiRepository.saveBMI(idToUse, summary)
+            // 2. CEK BADGE
+            val badgeManager = BadgeManager(badgeDao, bmiDao)
+            val newBadges = badgeManager.checkNewBadges(userId, summary)
 
-                // 2. CEK BADGE
-                if (badgeDao != null && bmiDao != null) {
-                    val badgeManager = BadgeManager(badgeDao, bmiDao)
-                    val newBadges = badgeManager.checkNewBadges(idToUse, summary)
-
-                    if (newBadges.isNotEmpty()) {
-                        _newlyUnlockedBadges.value = newBadges
-                    }
-                }
+            if (newBadges.isNotEmpty()) {
+                _newlyUnlockedBadges.value = newBadges
             }
 
             // Refresh list manual (Optimistic Update)
@@ -91,11 +89,9 @@ class ResultViewModel(
     }
 
     fun loadHistory(userId: Int) {
-        if (bmiRepository != null) {
-            viewModelScope.launch {
-                bmiRepository.getBMIHistoryByUser(userId).collect { historyList ->
-                    _history.value = historyList
-                }
+        viewModelScope.launch {
+            bmiRepository.getBMIHistoryByUser(userId).collect { historyList ->
+                _history.value = historyList
             }
         }
     }
@@ -110,9 +106,8 @@ class ResultViewModel(
 
     fun deleteHistory(id: String) {
         viewModelScope.launch {
-            if (bmiRepository != null) {
-                bmiRepository.deleteBMI(id)
-            }
+            bmiRepository.deleteBMI(id)
+            // Filter list lokal agar UI update instan
             _history.value = _history.value.filter { it.id != id }
         }
     }

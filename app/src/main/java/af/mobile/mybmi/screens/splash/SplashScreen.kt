@@ -25,14 +25,13 @@ import af.mobile.mybmi.R
 fun SplashScreen(
     onNavigateToHome: () -> Unit
 ) {
-    // Animasi sederhana (Scale & Fade In)
     var startAnimation by remember { mutableStateOf(false) }
 
-    // FIX: Menggunakan .value langsung dari animateFloatAsState
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 1000)
     ).value
+
     val scaleAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0.5f,
         animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
@@ -40,7 +39,7 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(2500) // Tahan 2.5 detik
+        delay(1000)
         onNavigateToHome()
     }
 
@@ -75,8 +74,8 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .scale(scaleAnim) // Menggunakan scaleAnim yang sudah di-fix
-                .alpha(alphaAnim)  // Menggunakan alphaAnim yang sudah di-fix
+                .scale(scaleAnim)
+                .alpha(alphaAnim)
         ) {
             // LOGO ICON CONTAINER
             Surface(

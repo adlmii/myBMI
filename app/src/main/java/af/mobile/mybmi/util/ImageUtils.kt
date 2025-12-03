@@ -72,36 +72,34 @@ object ImageUtils {
     }
 
     // 2. Simpan Bitmap ke Galeri HP
-    fun saveBitmapToGallery(context: Context, bitmap: Bitmap, title: String): Boolean {
+    fun saveBitmapToGallery(context: Context, bitmap: Bitmap, title: String): String {
         val filename = "$title.jpg"
         var fos: OutputStream? = null
         var imageUri: Uri? = null
 
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val resolver = context.contentResolver
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/myBMI")
-                }
-                imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                fos = imageUri?.let { resolver.openOutputStream(it) }
-            } else {
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val appDir = File(imagesDir, "myBMI")
-                if (!appDir.exists()) appDir.mkdirs()
-                val image = File(appDir, filename)
-                fos = FileOutputStream(image)
+        // Menggunakan try-catch di sini agar Exception diteruskan ke UI
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val resolver = context.contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/myBMI")
             }
-
-            fos?.use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-                return true
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+            imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if (imageUri == null) throw Exception("Gagal membuat file di Galeri")
+            fos = resolver.openOutputStream(imageUri)
+        } else {
+            val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val appDir = File(imagesDir, "myBMI")
+            if (!appDir.exists()) appDir.mkdirs()
+            val image = File(appDir, filename)
+            fos = FileOutputStream(image)
         }
-        return false
+
+        fos?.use {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+        } ?: throw Exception("Gagal membuka stream penyimpanan")
+
+        return "Berhasil disimpan di folder Pictures/myBMI"
     }
 }

@@ -6,16 +6,17 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 
 object ReminderScheduler {
 
-    // Fungsi untuk menyalakan pengingat
     fun scheduleMonthlyReminder(context: Context, dayOfMonth: Int, hour: Int = 9, minute: Int = 0) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java)
 
-        // Gunakan FLAG_IMMUTABLE agar aman di Android 12+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             101,
@@ -23,43 +24,45 @@ object ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val now = System.currentTimeMillis()
+        // --- LOGIKA MODERN (java.time) ---
+        val now = LocalDateTime.now()
 
-        // Setup Kalender Target
-        val targetCalendar = Calendar.getInstance().apply {
-            // Reset dulu ke waktu sekarang
-            timeInMillis = now
+        // Coba buat jadwal di bulan & tahun INI dulu
+        // Gunakan .coerceIn agar tanggal tidak crash (misal tgl 31 di Februari -> jadi tgl 28/29)
+        var targetDate = LocalDate.now()
+            .withDayOfMonth(dayOfMonth.coerceIn(1, LocalDate.now().lengthOfMonth()))
 
-            // Set ke tanggal & jam yang diinginkan (di bulan ini dulu)
-            set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
+        var targetDateTime = LocalDateTime.of(targetDate, LocalTime.of(hour, minute))
+
+        // Jika jadwal bulan ini sudah lewat, majukan ke BULAN DEPAN
+        if (targetDateTime.isBefore(now)) {
+            val nextMonth = now.plusMonths(1)
+            // Handle lagi validasi tanggal untuk bulan depan
+            val maxDayNextMonth = nextMonth.toLocalDate().lengthOfMonth()
+            val validDay = dayOfMonth.coerceIn(1, maxDayNextMonth)
+
+            targetDateTime = nextMonth.withDayOfMonth(validDay)
+                .withHour(hour).withMinute(minute).withSecond(0)
         }
 
-        // --- LOGIKA UTAMA ---
-        if (targetCalendar.timeInMillis <= now) {
-            // Jika sudah lewat, jadwalkan untuk BULAN DEPAN
-            targetCalendar.add(Calendar.MONTH, 1)
-        }
+        // Konversi ke Millis untuk AlarmManager
+        val triggerAtMillis = targetDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
 
-        // Set Alarm
         try {
-            // Menggunakan setExactAndAllowWhileIdle agar alarm tetap bunyi meski HP dalam mode Doze (tidur)
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                targetCalendar.timeInMillis,
+                triggerAtMillis,
                 pendingIntent
             )
-            Log.d("ReminderScheduler", "Alarm diset untuk: ${targetCalendar.time}")
+            Log.d("ReminderScheduler", "Alarm diset untuk: $targetDateTime")
         } catch (e: SecurityException) {
             e.printStackTrace()
-            Log.e("ReminderScheduler", "Gagal set alarm: Izin tidak diberikan")
         }
     }
 
-    // Fungsi untuk mematikan pengingat
     fun cancelReminder(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java)
@@ -69,8 +72,6 @@ object ReminderScheduler {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-
         alarmManager.cancel(pendingIntent)
-        Log.d("ReminderScheduler", "Alarm dibatalkan")
     }
 }

@@ -1,7 +1,7 @@
 package af.mobile.mybmi.viewmodel
 
-import af.mobile.mybmi.database.BadgeDao // Tambah
-import af.mobile.mybmi.database.UserBadgeEntity // Tambah
+import af.mobile.mybmi.database.BadgeDao
+import af.mobile.mybmi.database.UserBadgeEntity
 import af.mobile.mybmi.database.UserRepository
 import af.mobile.mybmi.model.UserProfile
 import af.mobile.mybmi.model.toEntity
@@ -11,19 +11,21 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-// UPDATE KONSTRUKTOR: Tambahkan badgeDao
-class UserViewModel(
-    private val userRepository: UserRepository? = null,
-    private val badgeDao: BadgeDao? = null
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val badgeDao: BadgeDao
 ) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<UserProfile?>(null)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
 
-    // STATE BARU: List Badge yang dimiliki User
+    // STATE : List Badge yang dimiliki User
     private val _userBadges = MutableStateFlow<List<UserBadgeEntity>>(emptyList())
     val userBadges: StateFlow<List<UserBadgeEntity>> = _userBadges.asStateFlow()
 
