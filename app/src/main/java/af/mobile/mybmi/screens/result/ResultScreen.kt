@@ -27,7 +27,9 @@ fun ResultScreen(
     resultViewModel: ResultViewModel = viewModel(),
     userViewModel: UserViewModel? = null
 ) {
-    val currentResult by resultViewModel.currentResult.collectAsState()
+
+    val currentResult by resultViewModel.selectedResult.collectAsState()
+
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
 
     var isSaved by remember { mutableStateOf(false) }
@@ -57,7 +59,7 @@ fun ResultScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 3. DETAIL INFO (MENGGUNAKAN AppCommon.kt -> DetailRow)
+                // 3. DETAIL INFO
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -101,7 +103,8 @@ fun ResultScreen(
                     text = if (isSaved) stringResource(R.string.btn_status_saved) else stringResource(R.string.btn_save_result),
                     onClick = {
                         if (!isSaved && currentUser != null) {
-                            resultViewModel.saveToHistory(summary, currentUser!!.id)
+                            resultViewModel.saveResult(currentUser!!.id, summary)
+
                             isSaved = true
                         }
                         onNavigateBack()
@@ -122,7 +125,8 @@ fun ResultScreen(
                 positiveText = stringResource(R.string.btn_exit),
                 onPositive = {
                     showUnsavedDialog = false
-                    resultViewModel.clearCurrentResult()
+                    resultViewModel.selectHistory(af.mobile.mybmi.model.BMICheckSummary.empty())
+
                     onNavigateBack()
                 }
             )

@@ -2,13 +2,13 @@ package af.mobile.mybmi.model
 
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
-// Data class untuk hasil BMI dan history
 data class BMICheckSummary(
-    val id: String = java.util.UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val timestamp: Date = Date(),
-    val height: Double, // cm
-    val weight: Double, // kg
+    val height: Double,
+    val weight: Double,
     val bmi: Double,
     val category: BMICategory,
     val idealWeightRange: Pair<Double, Double>
@@ -25,9 +25,23 @@ data class BMICheckSummary(
         val sdf = java.text.SimpleDateFormat("HH:mm", localeID)
         return sdf.format(timestamp)
     }
+
+    companion object {
+        fun empty(): BMICheckSummary {
+            return BMICheckSummary(
+                id = "",
+                timestamp = Date(),
+                height = 0.0,
+                weight = 0.0,
+                bmi = 0.0,
+                category = BMICategory.NORMAL,
+                idealWeightRange = Pair(0.0, 0.0)
+            )
+        }
+    }
 }
 
-// Enum untuk kategori BMI
+// BMI Category Enum
 enum class BMICategory(
     val displayName: String,
     val description: String,

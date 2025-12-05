@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -255,7 +256,8 @@ fun EditProfileScreen(
                         value = name,
                         onValueChange = { name = it },
                         suffix = "",
-                        placeholderText = stringResource(R.string.placeholder_nickname)
+                        placeholderText = stringResource(R.string.placeholder_nickname),
+                        keyboardType = KeyboardType.Text
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

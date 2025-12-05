@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -59,7 +60,7 @@ fun HomeScreen(
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
 
     val newBadges by resultViewModel.newlyUnlockedBadges.collectAsState()
-    val streakCount by resultViewModel.streakCount.collectAsState()
+    val streakCount by resultViewModel.streakCount.collectAsStateWithLifecycle()
 
     if (newBadges.isNotEmpty()) {
         AchievementDialog(
@@ -115,7 +116,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // JADWAL CARD (REFACTORED)
+                // JADWAL CARD
                 ScheduleStatusCard(
                     isEnabled = isReminderEnabled,
                     day = reminderDay,
@@ -137,7 +138,7 @@ fun HomeScreen(
                             text = stringResource(R.string.input_card_title),
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
                         )
 
                         ModernInput(
@@ -145,7 +146,8 @@ fun HomeScreen(
                             value = input.height,
                             onValueChange = { inputViewModel.updateHeight(it) },
                             suffix = stringResource(R.string.suffix_cm),
-                            placeholderText = stringResource(R.string.hint_height)
+                            placeholderText = stringResource(R.string.hint_height),
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
                         )
 
                         ModernInput(
@@ -153,7 +155,8 @@ fun HomeScreen(
                             value = input.weight,
                             onValueChange = { inputViewModel.updateWeight(it) },
                             suffix = stringResource(R.string.suffix_kg),
-                            placeholderText = stringResource(R.string.hint_weight)
+                            placeholderText = stringResource(R.string.hint_weight),
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
                         )
 
                         Spacer(modifier = Modifier.height(24.dp))

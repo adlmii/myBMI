@@ -27,7 +27,6 @@ abstract class MyBMIDatabase : RoomDatabase() {
                     MyBMIDatabase::class.java,
                     "mybmi_database"
                 )
-                    .fallbackToDestructiveMigration() // Hapus data lama jika versi naik (aman untuk dev)
                     .build()
                 INSTANCE = instance
                 instance

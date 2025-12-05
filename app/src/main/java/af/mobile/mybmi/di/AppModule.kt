@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import af.mobile.mybmi.database.StreakRepository
+import af.mobile.mybmi.util.BadgeManager
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -61,5 +63,18 @@ object AppModule {
     @Singleton
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return context.dataStore
+    }
+
+    // --- 5. PROVIDER STREAK REPOSITORY ---
+    @Provides
+    @Singleton
+    fun provideStreakRepository(dataStore: DataStore<Preferences>): StreakRepository {
+        return StreakRepository(dataStore)
+    }
+
+    // --- 6. PROVIDER BADGE MANAGER ---
+    @Provides
+    fun provideBadgeManager(badgeDao: BadgeDao, bmiDao: BMIDao): BadgeManager {
+        return BadgeManager(badgeDao, bmiDao)
     }
 }

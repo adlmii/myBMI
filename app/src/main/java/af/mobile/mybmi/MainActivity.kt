@@ -159,7 +159,8 @@ fun MyBMIApp(
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToResult = { summary ->
-                        resultViewModel.setCurrentResult(summary)
+                        resultViewModel.selectHistory(summary)
+
                         navController.navigate(Screen.Result.route)
                     },
                     onNavigateToSettings = {

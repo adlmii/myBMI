@@ -7,14 +7,14 @@ import af.mobile.mybmi.model.BMICategory
 import af.mobile.mybmi.model.BMICheckSummary
 import af.mobile.mybmi.model.Badge
 import java.util.Calendar
-import java.util.Date
+import javax.inject.Inject
 
-class BadgeManager(
+class BadgeManager @Inject constructor(
     private val badgeDao: BadgeDao,
     private val bmiDao: BMIDao
 ) {
 
-    suspend fun checkNewBadges(userId: Int, summary: BMICheckSummary): List<Badge> {
+    suspend fun checkNewBadges(userId: Int, summary: BMICheckSummary, currentStreak: Int): List<Badge> {
         val unlockedBadges = mutableListOf<Badge>()
 
         // 1. Cek Badge: FIRST_STEP
@@ -53,26 +53,7 @@ class BadgeManager(
             }
         }
 
-        // 5. --- CEK STREAK ---
-        val historyEntities = bmiDao.getBMIHistoryList(userId)
-
-        // Convert Entity ke Model agar bisa dipakai StreakUtils
-        val historyModels = historyEntities.map { entity ->
-            BMICheckSummary(
-                id = entity.uniqueId,
-                timestamp = Date(entity.timestamp),
-                height = entity.height,
-                weight = entity.weight,
-                bmi = entity.bmi,
-                category = try { BMICategory.valueOf(entity.category) } catch (e: Exception) { BMICategory.NORMAL },
-                idealWeightRange = Pair(entity.idealWeightMin, entity.idealWeightMax)
-            )
-        }
-
-        // Hitung Streak
-        val currentStreak = StreakUtils.calculateMonthlyStreak(historyModels)
-
-        // Cek Unlock Badge Streak
+        // 5. --- CEK STREAK (LOGIC BARU) ---
         if (currentStreak >= 1 && !hasBadge(userId, Badge.STREAK_1)) {
             unlockBadge(userId, Badge.STREAK_1)
             unlockedBadges.add(Badge.STREAK_1)

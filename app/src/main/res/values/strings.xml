@@ -14,8 +14,8 @@
     <string name="input_card_title">Kalkulator BMI</string>
     <string name="label_height">Tinggi Badan</string>
     <string name="label_weight">Berat Badan</string>
-    <string name="hint_height">Contoh: 170</string>
-    <string name="hint_weight">Contoh: 65</string>
+    <string name="hint_height">170</string>
+    <string name="hint_weight">65</string>
     <string name="suffix_cm">cm</string>
     <string name="suffix_kg">kg</string>
     <string name="btn_calculate">Hitung Sekarang</string>

@@ -35,7 +35,8 @@ fun ModernInput(
     value: String,
     onValueChange: (String) -> Unit,
     suffix: String,
-    placeholderText: String
+    placeholderText: String,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = Modifier.padding(bottom = 16.dp)) {
         Text(
@@ -62,7 +63,7 @@ fun ModernInput(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,

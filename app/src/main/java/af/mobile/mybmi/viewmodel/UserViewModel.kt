@@ -22,6 +22,7 @@ class UserViewModel @Inject constructor(
     private val badgeDao: BadgeDao
 ) : ViewModel() {
 
+    // STATE : Current User Profile
     private val _currentUser = MutableStateFlow<UserProfile?>(null)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
 
@@ -29,12 +30,13 @@ class UserViewModel @Inject constructor(
     private val _userBadges = MutableStateFlow<List<UserBadgeEntity>>(emptyList())
     val userBadges: StateFlow<List<UserBadgeEntity>> = _userBadges.asStateFlow()
 
+    // STATE : Kontrol Tampilan Dialog Input Nama dan DOB
     private val _showNameInput = MutableStateFlow(false)
     val showNameInput: StateFlow<Boolean> = _showNameInput.asStateFlow()
-
     private val _showDobInput = MutableStateFlow(false)
     val showDobInput: StateFlow<Boolean> = _showDobInput.asStateFlow()
 
+    // STATE : Indikator Loading
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -42,34 +44,33 @@ class UserViewModel @Inject constructor(
         loadCurrentUser()
     }
 
+    // FUNCTION : Load Current User dari Database
     fun loadCurrentUser() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (userRepository != null) {
-                    val userEntity = userRepository.getLatestUser()
+                val userEntity = userRepository.getLatestUser()
 
-                    if (userEntity != null) {
-                        val profile = userEntity.toModel()
-                        _currentUser.value = profile
+                if (userEntity != null) {
+                    val profile = userEntity.toModel()
+                    _currentUser.value = profile
 
-                        // LOAD BADGES SAAT USER TERDETEKSI
-                        loadUserBadges(profile.id)
+                    // LOAD BADGES SAAT USER TERDETEKSI
+                    loadUserBadges(profile.id)
 
-                        // ... (Logika Dialog Nama/DOB tetap sama) ...
-                        if (profile.name.isBlank()) {
-                            _showNameInput.value = true
-                            _showDobInput.value = false
-                        } else if (profile.birthDate == 0L) {
-                            _showNameInput.value = false
-                            _showDobInput.value = true
-                        } else {
-                            _showNameInput.value = false
-                            _showDobInput.value = false
-                        }
-                    } else {
+                    // Logika Dialog Nama/DOB
+                    if (profile.name.isBlank()) {
                         _showNameInput.value = true
+                        _showDobInput.value = false
+                    } else if (profile.birthDate == 0L) {
+                        _showNameInput.value = false
+                        _showDobInput.value = true
+                    } else {
+                        _showNameInput.value = false
+                        _showDobInput.value = false
                     }
+                } else {
+                    _showNameInput.value = true
                 }
             } finally {
                 _isLoading.value = false
@@ -77,31 +78,25 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    // FUNGSI BARU: Ambil Badge dari Database
+    // FUNCTION : Load Badges milik User dari Database
     private fun loadUserBadges(userId: Int) {
-        if (badgeDao != null) {
-            viewModelScope.launch {
-                badgeDao.getUserBadges(userId).collect { badges ->
-                    _userBadges.value = badges
-                }
+        viewModelScope.launch {
+            badgeDao.getUserBadges(userId).collect { badges ->
+                _userBadges.value = badges
             }
         }
     }
 
-    // ... (Sisa fungsi saveUserName, saveUserBirthDate, updateUserFull BIARKAN SAMA) ...
-    // Copy paste kode lama di bawah sini
     fun saveUserName(name: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            if (userRepository != null) {
-                userRepository.insertUser(name)
-                loadCurrentUser()
-            }
+            userRepository.insertUser(name)
+            loadCurrentUser()
         }
     }
 
     fun saveUserBirthDate(day: Int, month: Int, year: Int) {
-        if (userRepository == null) return
+        // [FIX] Hapus cek null return
         val calendar = Calendar.getInstance()
         calendar.set(year, month - 1, day)
         val newBirthDateMillis = calendar.timeInMillis
@@ -124,10 +119,8 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (userRepository != null) {
-                    userRepository.updateUser(user.toEntity())
-                    _currentUser.value = user
-                }
+                userRepository.updateUser(user.toEntity())
+                _currentUser.value = user
             } finally {
                 _isLoading.value = false
             }

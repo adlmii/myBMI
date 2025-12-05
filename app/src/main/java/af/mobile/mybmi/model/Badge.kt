@@ -2,6 +2,8 @@ package af.mobile.mybmi.model
 
 import af.mobile.mybmi.R
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -16,7 +18,8 @@ enum class Badge(
         id = "first_step",
         titleRes = R.string.badge_first_step_title,
         descriptionRes = R.string.badge_first_step_desc,
-        icon = Icons.Rounded.DirectionsRun,
+        // [PERBAIKAN] Gunakan AutoMirrored
+        icon = Icons.AutoMirrored.Rounded.DirectionsRun,
         requirementRes = R.string.badge_first_step_req
     ),
 
@@ -31,7 +34,8 @@ enum class Badge(
         id = "streak_3",
         titleRes = R.string.badge_streak_3_title,
         descriptionRes = R.string.badge_streak_3_desc,
-        icon = Icons.Rounded.TrendingUp,
+        // [PERBAIKAN] Gunakan AutoMirrored
+        icon = Icons.AutoMirrored.Rounded.TrendingUp,
         requirementRes = R.string.badge_streak_3_req
     ),
     STREAK_6(

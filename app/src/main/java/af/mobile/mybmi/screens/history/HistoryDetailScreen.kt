@@ -30,7 +30,7 @@ fun HistoryDetailScreen(
     onNavigateBack: () -> Unit,
     resultViewModel: ResultViewModel = viewModel()
 ) {
-    val selectedHistory by resultViewModel.selectedHistory.collectAsState()
+    val selectedHistory by resultViewModel.selectedResult.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
