@@ -31,14 +31,14 @@ fun BigBMIIndicator(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        // Lingkaran Background (Abu-abu)
+        // Lingkaran Background
         CircularProgressIndicator(
             progress = { 1f },
             modifier = Modifier.size(size),
             color = MaterialTheme.colorScheme.surfaceVariant,
             strokeWidth = strokeWidth,
         )
-        // Lingkaran Progress (Warna sesuai status)
+        // Lingkaran Progress
         CircularProgressIndicator(
             progress = { progress },
             modifier = Modifier.size(size),

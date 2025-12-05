@@ -11,7 +11,7 @@ object StreakUtils {
         // 1. Urutkan dari TERLAMA ke TERBARU
         val sortedHistory = history.sortedBy { it.timestamp }
 
-        // 2. Konversi Date (Legacy) ke LocalDate (Modern)
+        // 2. Konversi Date ke LocalDate
         val dates = sortedHistory.map {
             it.timestamp.toInstant()
                 .atZone(ZoneId.systemDefault())
@@ -19,7 +19,7 @@ object StreakUtils {
         }
 
         var streak = 1
-        var anchorDate = dates[0] // Patokan tanggal (bulan) saat ini
+        var anchorDate = dates[0]
 
         for (i in 1 until dates.size) {
             val checkDate = dates[i]

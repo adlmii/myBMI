@@ -1,7 +1,7 @@
 package af.mobile.mybmi.screens.result
 
 import af.mobile.mybmi.R
-import af.mobile.mybmi.components.* // Import semua komponen yang baru kita buat
+import af.mobile.mybmi.components.*
 import af.mobile.mybmi.theme.*
 import af.mobile.mybmi.viewmodel.ResultViewModel
 import af.mobile.mybmi.viewmodel.UserViewModel

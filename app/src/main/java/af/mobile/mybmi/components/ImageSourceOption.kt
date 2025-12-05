@@ -31,7 +31,7 @@ fun ImageSourceOption(
         ),
 
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Flat design
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -47,7 +47,7 @@ fun ImageSourceOption(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = BrandPrimary, // Warna Icon Mint
+                    tint = BrandPrimary,
                     modifier = Modifier.size(28.dp)
                 )
             }

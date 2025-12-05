@@ -31,7 +31,7 @@ fun BMITrendChart(
         history.sortedBy { it.timestamp }.takeLast(7)
     }
 
-    if (dataPoints.size < 2) return // Butuh minimal 2 titik untuk garis
+    if (dataPoints.size < 2) return
 
     // Animasi Progress (0f -> 1f)
     val animationProgress = remember { Animatable(0f) }
@@ -39,7 +39,7 @@ fun BMITrendChart(
     LaunchedEffect(dataPoints) {
         animationProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 1500) // Durasi animasi 1.5 detik
+            animationSpec = tween(durationMillis = 1500)
         )
     }
 

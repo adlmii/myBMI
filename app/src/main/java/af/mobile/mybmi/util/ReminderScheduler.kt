@@ -24,11 +24,8 @@ object ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // --- LOGIKA MODERN (java.time) ---
         val now = LocalDateTime.now()
 
-        // Coba buat jadwal di bulan & tahun INI dulu
-        // Gunakan .coerceIn agar tanggal tidak crash (misal tgl 31 di Februari -> jadi tgl 28/29)
         var targetDate = LocalDate.now()
             .withDayOfMonth(dayOfMonth.coerceIn(1, LocalDate.now().lengthOfMonth()))
 

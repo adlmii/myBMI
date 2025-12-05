@@ -17,7 +17,7 @@ import java.util.UUID
 
 object ImageUtils {
 
-    // Simpan Foto Profil (Tetap Sama)
+    // Simpan Foto Profil
     fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
         return try {
             val fileName = "profile_${UUID.randomUUID()}.jpg"

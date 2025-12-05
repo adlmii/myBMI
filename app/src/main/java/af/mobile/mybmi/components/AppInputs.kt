@@ -99,12 +99,12 @@ fun ModernClickableInput(
         // TextField ReadOnly dengan event Click manual
         OutlinedTextField(
             value = value,
-            onValueChange = {}, // Tidak melakukan apa-apa saat diketik
+            onValueChange = {},
             readOnly = true,
-            enabled = false, // Disable agar keyboard tidak muncul, tapi click di-handle parent
+            enabled = false,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClick() }, // Event Click di sini
+                .clickable { onClick() },
 
             // LOGIKA PLACEHOLDER BARU: Tampil jika value kosong
             placeholder = {
