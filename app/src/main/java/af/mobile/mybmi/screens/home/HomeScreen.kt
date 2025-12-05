@@ -1,6 +1,7 @@
 package af.mobile.mybmi.screens.home
 
 import af.mobile.mybmi.R
+import androidx.compose.ui.graphics.toArgb
 import af.mobile.mybmi.components.AchievementDialog
 import af.mobile.mybmi.components.GradientScreenLayout
 import af.mobile.mybmi.components.ModernDialogContainer
