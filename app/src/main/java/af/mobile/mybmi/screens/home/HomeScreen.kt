@@ -35,8 +35,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -51,8 +52,11 @@ fun HomeScreen(
     reminderViewModel: ReminderViewModel = viewModel(),
     resultViewModel: ResultViewModel = viewModel()
 ) {
+    // --- STATE ---
     val input by inputViewModel.input.collectAsState()
     val isCalculating by inputViewModel.isCalculating.collectAsState()
+    val errorMessage by inputViewModel.errorMessage.collectAsState()
+
     val currentUser by userViewModel?.currentUser?.collectAsState() ?: remember { mutableStateOf(null) }
     val showNameInput by userViewModel?.showNameInput?.collectAsState() ?: remember { mutableStateOf(false) }
 
@@ -60,8 +64,9 @@ fun HomeScreen(
     val reminderDay by reminderViewModel.reminderDay.collectAsState()
 
     val newBadges by resultViewModel.newlyUnlockedBadges.collectAsState()
-    val streakCount by resultViewModel.streakCount.collectAsStateWithLifecycle()
+    val streakCount by resultViewModel.streakCount.collectAsState()
 
+    // --- BADGE DIALOG ---
     if (newBadges.isNotEmpty()) {
         AchievementDialog(
             badge = newBadges.first(),
@@ -70,7 +75,7 @@ fun HomeScreen(
     }
 
     GradientScreenLayout(
-        headerContent = { /* Kosong */ },
+        headerContent = { /* Kosong, header manual di bawah */ },
         content = {
             Column(
                 modifier = Modifier
@@ -80,7 +85,7 @@ fun HomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // HEADER
+                // --- HEADER SECTION ---
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -116,7 +121,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // JADWAL CARD
+                // --- JADWAL CARD ---
                 ScheduleStatusCard(
                     isEnabled = isReminderEnabled,
                     day = reminderDay,
@@ -125,7 +130,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // INPUT CARD
+                // --- INPUT CARD ---
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -138,34 +143,57 @@ fun HomeScreen(
                             text = stringResource(R.string.input_card_title),
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 24.dp),
+                            modifier = Modifier.padding(bottom = 24.dp)
                         )
 
+                        // INPUT TINGGI (Keyboard Angka)
                         ModernInput(
                             label = stringResource(R.string.label_height),
                             value = input.height,
                             onValueChange = { inputViewModel.updateHeight(it) },
                             suffix = stringResource(R.string.suffix_cm),
                             placeholderText = stringResource(R.string.hint_height),
-                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                            keyboardType = KeyboardType.Decimal
                         )
 
+                        // INPUT BERAT (Keyboard Angka)
                         ModernInput(
                             label = stringResource(R.string.label_weight),
                             value = input.weight,
                             onValueChange = { inputViewModel.updateWeight(it) },
                             suffix = stringResource(R.string.suffix_kg),
                             placeholderText = stringResource(R.string.hint_weight),
-                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                            keyboardType = KeyboardType.Decimal
                         )
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
+                        // TEXT ERROR MESSAGE
+                        if (errorMessage != null) {
+                            Text(
+                                text = errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(8.dp)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // TOMBOL HITUNG
                         PrimaryButton(
                             text = stringResource(R.string.btn_calculate),
                             onClick = {
                                 inputViewModel.calculateBMI { summary -> onNavigateToResult(summary) }
-                                inputViewModel.clearInput()
                             },
                             enabled = inputViewModel.canCalculate(),
                             isLoading = isCalculating
@@ -178,11 +206,14 @@ fun HomeScreen(
         }
     )
 
+    // Dialog Nama
     if (showNameInput) {
         NameInputDialog(onConfirm = { name -> userViewModel?.saveUserName(name) })
     }
 }
 
+
+// --- KOMPOSABLE BANTUAN ---
 @Composable
 fun StreakBadge(count: Int) {
     val isActive = count > 0
@@ -223,7 +254,6 @@ fun ScheduleStatusCard(isEnabled: Boolean, day: Int, onClick: () -> Unit) {
     val icon = if (isEnabled) Icons.Rounded.CalendarMonth else Icons.Rounded.NotificationsOff
     val iconBgColor = if (isEnabled) BrandPrimary else MaterialTheme.colorScheme.error
 
-    // String Resources
     val titleText = if (isEnabled)
         stringResource(R.string.reminder_title_on)
     else
